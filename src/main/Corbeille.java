@@ -26,4 +26,5 @@ public class Corbeille {
     public static void ajouterDechet(){}
     public static void viderCorbeille(){}
 
+
 }

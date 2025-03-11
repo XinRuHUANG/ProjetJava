@@ -3,27 +3,43 @@ package main;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Scanner;
 
-public class Commerce {
-    private String nom;
+public class Contrat {
+    int id;
+    String dateDebut;
+    String dateFin;
 
-    public String getNom() {
-        return nom;
+    public Contrat(int id, String dateDebut, String dateFin) {
+        this.id = id;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public Contrat() {
     }
 
-    public static void definirContrat(){
-        Scanner sc = new Scanner(System.in);
+    public int getId() {
+        return id;
+    }
 
-        System.out.println("Date de début: ");
-        String date = sc.nextLine();
+    public void setId(int id) {
+        this.id = id;
+    }
 
-        String query = "INSERT INTO contrat ("
+    public String getDateDebut() {
+        return dateDebut;
+    }
 
+    public void setDateDebut(String dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public String getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(String dateFin) {
+        this.dateFin = dateFin;
     }
 
     public static void renouvelerContrat(Connection connection, int id, int idCommerce, int idCentreTri, String dateDebut, String dateFin){
@@ -40,5 +56,7 @@ public class Commerce {
         }
     }
 
-    public static void listerProduitsPromo(){}
+    public void lireRègles(){
+
+    }
 }
