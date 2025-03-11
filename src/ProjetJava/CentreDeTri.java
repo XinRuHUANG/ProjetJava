@@ -27,4 +27,6 @@ public class CentreDeTri {
     public void setAddresse(String addresse) {
         this.addresse = addresse;
     }
+
+    test 1 2 3 est ce que vous voyez ?
 }
