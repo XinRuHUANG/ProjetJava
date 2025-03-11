@@ -6,6 +6,12 @@ public class PoubelleIntelligente {
     private String emplacement;
     private int capaciteMaximale;
 
+    //Constantes de poids (évoquées dans le sujet)
+    public static final int pp = 0;
+    public static final int pv = 0;
+    public static final int pc = 0;
+    public static final int pm = 0;
+
     public PoubelleIntelligente(int identifiant, String emplacement, int capaciteMaximale){
         this.identifiant = identifiant;
         this.emplacement = emplacement;
@@ -22,18 +28,20 @@ public class PoubelleIntelligente {
 
     public static void identifier(){}
     public static void mesurerVolume(){}
-    public static void mesurerPoids(){}
+    public static void calculerPoids(){
+
+    }
     public boolean verifierNature(String typeDechet, String typePoubelle){
         return typeDechet.equals(typePoubelle);
     }
-    public int attribuerPoints(int idCompte, int quantite){
+    public int ajouterPoints(int idCompte, int quantite){
         return quantite * 10;
     }
     public int retirerPoints(int idCompte, int quantite){
         return -quantite * 5;
     }
     public int calculerPenalite(int idCompte, int quantite){
-        return attribuerPoints(idCompte, quantite) + retirerPoints(idCompte, quantite);
+        return ajouterPoints(idCompte, quantite) + retirerPoints(idCompte, quantite);
     }
     public void attribuerPoints(int idCompte, int points){
         String requete = "UPDATE Compte SET pointsFidélité = pointsFidélité + " + Integer.toString(points) + " WHERE idCompte = " + idCompte + ";";
