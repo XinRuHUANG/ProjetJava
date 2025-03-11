@@ -1,4 +1,5 @@
 package main.PoubelleIntelligente;
+import static main.outils.connexionSQL.requete;
 
 public class PoubelleIntelligente {
     private int identifiant;
@@ -22,10 +23,23 @@ public class PoubelleIntelligente {
     public static void identifier(){}
     public static void mesurerVolume(){}
     public static void mesurerPoids(){}
-    public static void verifierNature(){}
-    public static void calculerPenalite(){}
-    public static void attribuerPoints(){}
-    public static void retirerPoints(){}
+    public boolean verifierNature(String typeDechet, String typePoubelle){
+        return typeDechet.equals(typePoubelle);
+    }
+    public int attribuerPoints(int idCompte, int quantite){
+        return quantite * 10;
+    }
+    public int retirerPoints(int idCompte, int quantite){
+        return -quantite * 5;
+    }
+    public int calculerPenalite(int idCompte, int quantite){
+        return attribuerPoints(idCompte, quantite) + retirerPoints(idCompte, quantite);
+    }
+    public void attribuerPoints(int idCompte, int points){
+        String requete = "UPDATE Compte SET pointsFidélité = pointsFidélité + " + Integer.toString(points) + " WHERE idCompte = " + idCompte + ";";
+        requete(requete);
+    }
+
     public static void notifierCentre(){}
 
 }
