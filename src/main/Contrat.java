@@ -46,12 +46,12 @@ public class Contrat {
         this.dateFin = dateFin;
     }
 
-    public static void renouvelerContrat(Connection connection, int id, int idCommerce, int idCentreTri, String dateDebut, String dateFin){
-        String query = "INSERT INTO Contrat (idCommerce, idCentreTri, dateDebut, dateFin VALUES (?,?,?,?);";
+    public static void renouvelerContrat(int id, int idCommerce, int idCentreTri, String newDateDebut, String newDateFin){
+        String query = "UPDATE Contrat SET dateDebut = "+newDateDebut+", dateFin = "+newDateFin+" WHERE id = "+id+";";
         requete(query);
     }
 
-    public void lireRègles(){
+    public void lireRegles(){
 
     }
 }

@@ -26,7 +26,7 @@ public class Commerce {
         requete(query);
     }
 
-    public static void listerProduitsPromo(Connection connection){
+    public static void listerProduitsPromo(){
         String query = "SELECT * FROM Promotion, Commerce WHERE Promotion.idCommerce = Commerce.idCommerce;";
         ArrayList<String> list = new ArrayList<>();
         requeteAvecAffichage(query,list);
