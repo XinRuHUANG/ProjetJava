@@ -60,6 +60,7 @@ CREATE TABLE Contrat(
     idCentreTri INT,
 	dateDebut DATE,
     dateFin DATE,
+	promotion VARCHAR(50),
 	CONSTRAINT pk_Contrat PRIMARY KEY (idCommerce, idCentreTri, dateDebut),
 	FOREIGN KEY fk_commerce(idCommerce) REFERENCES Commerce(idCommerce), 
 	FOREIGN KEY fk_centre(idCentreTri) REFERENCES CentreTri(idCentreTri));
