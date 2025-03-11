@@ -30,30 +30,38 @@ public class connexionSQL {
         }
     }
 
-    public static List<HashMap<String, String>> requeteAvecAffichage(String requete, ArrayList<String> attributs){
+    public static List<HashMap<String, String>> requeteAvecAffichage(String requete, ArrayList<String> attributs) {
         List<HashMap<String, String>> infos = new ArrayList<>();
+
         try {
-            // Etape 1 : Etablir la connexion
+            // Étape 1 : Établir la connexion
             Connection connection = DriverManager.getConnection(url, user, password);
 
-            // Etape 2 : Créer un Statement
+            // Étape 2 : Créer un Statement
             Statement statement = connection.createStatement();
 
+            // Exécution de la requête
             ResultSet resultSet = statement.executeQuery(requete);
 
-            int k = 0;
-            HashMap<String, String> HashmapPivot = new HashMap<>();
+            // Parcourir les résultats
             while (resultSet.next()) {
-                String attribut = attributs.get(k);
-                HashmapPivot.put(attribut,resultSet.getString(attribut));
-                k ++;
+                HashMap<String, String> ligne = new HashMap<>();
+
+                for (String attribut : attributs) {
+                    ligne.put(attribut, resultSet.getString(attribut)); // Récupération des valeurs
+                }
+
+                infos.add(ligne); // Ajouter la ligne complète à la liste
             }
+
+            // Fermer les ressources
             resultSet.close();
             statement.close();
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return infos;
     }
 
