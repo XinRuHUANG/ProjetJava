@@ -39,7 +39,7 @@ public class CentreDeTri {
         requete(requete);
     }
     public static void statistiquerDechets(int id){
-        String requete = "SELECT COUNT(*) FROM <Poubelle> WHERE <idPoubelle> =" + Integer.toString(id) + ";";
+        String requete = "SELECT COUNT(*) FROM Poubelle WHERE idPoubelle =" + Integer.toString(id) + ";";
         requete(requete);
     }
 }

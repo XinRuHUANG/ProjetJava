@@ -52,6 +52,6 @@ public class Contrat {
     }
 
     public void lireRegles(){
-
+        //Définir une règle pour le système de points
     }
 }
