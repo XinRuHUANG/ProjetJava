@@ -4,7 +4,6 @@ public class Compte {
     private int pointsFidelite;
     private int codeAcces;
 
-
     public Compte(int pointsFidelite, int codeAcces) {
         this.pointsFidelite = pointsFidelite;
         this.codeAcces = codeAcces;
