@@ -36,6 +36,10 @@ public class CentreDeTri {
     //Normalement il faudrait récupérer le contenu de la poubelle puis changer la base de données mais on va juste changer
     public static void collecterDechets(int id){
         String requete = "UPDATE <Poubelle> SET volume = 0 WHERE idPoubelle = " + Integer.toString(id) + ";";
+        requete(requete);
     }
-    public static void statistiquerDechets(){}
+    public static void statistiquerDechets(int id){
+        String requete = "SELECT COUNT(*) FROM <Poubelle> WHERE <idPoubelle> =" + Integer.toString(id) + ";";
+        requete(requete);
+    }
 }
