@@ -71,5 +71,14 @@ CREATE TABLE historiqueDepot(
     CONSTRAINT pk_Depot PRIMARY KEY (idPoubelle, idCorbeille, idCompte),
     FOREIGN KEY (idCorbeille) REFERENCES Corbeille(idCorbeille), 
 	FOREIGN KEY (idPoubelle) REFERENCES PoubelleIntelligente(idPoubelle));
+CREATE TABLE Promotion(
+    idCommerce INT,
+    idCompte INT,
+    pourcentageRemise INT,
+    ptRequis INT,
+    CONSTRAINT pk_promotion PRIMARY KEY (idCommerce,idCompte),
+    FOREIGN KEY (idCommerce) REFERENCES Commerce(idCommerce),
+    FOREIGN KEY (idCompte) REFERENCES Compte(idCompte));
+
     
 
