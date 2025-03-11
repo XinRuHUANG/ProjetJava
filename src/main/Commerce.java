@@ -3,7 +3,12 @@ package main;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import static main.outils.connexionSQL.requete;
+import static main.outils.connexionSQL.requeteAvecAffichage;
+
 
 public class Commerce {
     private String nom;
@@ -16,29 +21,14 @@ public class Commerce {
         this.nom = nom;
     }
 
-    public static void definirContrat(){
-        Scanner sc = new Scanner(System.in);
-
-        System.out.println("Date de début: ");
-        String date = sc.nextLine();
-
-        String query = "INSERT INTO contrat ("
-
+    public static void definirContrat(int id, int idCommerce, int idCentreTri, String dateDebut, String dateFin){
+        String query = "INSERT INTO Contrat (idCommerce, idCentreTri, dateDebut, dateFin VALUES ("+idCommerce+","+idCentreTri+","+dateDebut+","+dateFin+");";
+        requete(query);
     }
 
-    public static void renouvelerContrat(Connection connection, int id, int idCommerce, int idCentreTri, String dateDebut, String dateFin){
-        String query = "INSERT INTO contrat (idCommerce, idCentreTri, dateDebut, dateFin VALUES (?,?,?,?);";
-        try (PreparedStatement statement = connection.prepareStatement(query)){
-            statement.setInt(1,id);
-            statement.setInt(2,idCommerce);
-            statement.setInt(3,idCentreTri);
-            statement.setString(4,dateDebut);
-            statement.setString(5,dateFin);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public static void listerProduitsPromo(Connection connection){
+        String query = "SELECT * FROM Promotion, Commerce WHERE Promotion.idCommerce = Commerce.idCommerce;";
+        ArrayList<String> list = new ArrayList<>();
+        requeteAvecAffichage(query,list);
     }
-
-    public static void listerProduitsPromo(){}
 }

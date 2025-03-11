@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static main.outils.connexionSQL.requete;
+import static main.outils.connexionSQL.requeteAvecAffichage;
+
+
 public class Contrat {
     int id;
     String dateDebut;
@@ -43,17 +47,8 @@ public class Contrat {
     }
 
     public static void renouvelerContrat(Connection connection, int id, int idCommerce, int idCentreTri, String dateDebut, String dateFin){
-        String query = "INSERT INTO contrat (idCommerce, idCentreTri, dateDebut, dateFin VALUES (?,?,?,?);";
-        try (PreparedStatement statement = connection.prepareStatement(query)){
-            statement.setInt(1,id);
-            statement.setInt(2,idCommerce);
-            statement.setInt(3,idCentreTri);
-            statement.setString(4,dateDebut);
-            statement.setString(5,dateFin);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        String query = "INSERT INTO Contrat (idCommerce, idCentreTri, dateDebut, dateFin VALUES (?,?,?,?);";
+        requete(query);
     }
 
     public void lireRègles(){
