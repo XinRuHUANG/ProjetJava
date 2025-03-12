@@ -3,9 +3,11 @@ package main;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
+import static main.Commerce.listerProduitsPromo;
 
 
 public class Contrat {
@@ -51,7 +53,11 @@ public class Contrat {
         requete(query);
     }
 
-    public void lireRegles(){
-        //Définir une règle pour le système de points
+    public void lireRegles(int idCommerce){
+        String query = "SELECT pourcentageRemise, ptRequis, dateDebut, dateFin FROM Contrat, Promotion";
+        ArrayList<String> regles = new ArrayList<>();
+        requeteAvecAffichage(query, regles);
+
+        listerProduitsPromo(idCommerce);
     }
 }

@@ -1,5 +1,8 @@
 package main;
 
+import static main.outils.connexionSQL.requete;
+import static main.outils.connexionSQL.requeteAvecAffichage;
+
 public class Corbeille {
     private int nbPlastiques;
     private int nbVerres;
@@ -23,8 +26,14 @@ public class Corbeille {
     public void setNbCartons(int nbCartons){this.nbCartons = nbCartons;}
     public void setNbMetaux(int nbMetaux){this.nbMetaux = nbMetaux;}
 
-    public static void ajouterDechet(){}
-    public static void viderCorbeille(){}
+    public static void ajouterDechet(int id, int qtePlastique, int qteCarton, int qteMetaux, int qteVerre){
+        String requete = "INSERT INTO <Corbeille> (qtePlastique, qteVerre, qteCarton, qteMetaux) VALUES ("+qtePlastique+", "+qteVerre+", "+qteCarton+", "+qteMetaux+";";
+        requete(requete);
+    }
+    public static void viderCorbeille(int id){
+        String requete = "UPDATE <Corbeille> SET qtePlastique=0, qteVerre=0, qteCarton=0, qteMetaux=0;";
+        requete(requete);
+    }
 
 
 }

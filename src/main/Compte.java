@@ -1,6 +1,8 @@
 package main;
 
 import static main.outils.connexionSQL.requete;
+import static main.outils.connexionSQL.requeteAvecAffichage;
+
 
 public class Compte {
     private int pointsFidelite;
