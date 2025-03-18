@@ -72,7 +72,7 @@ CREATE TABLE Contrat(
 	FOREIGN KEY fk_commerce(idCommerce) REFERENCES Commerce(idCommerce), 
 	FOREIGN KEY fk_centre(idCentreTri) REFERENCES CentreTri(idCentreTri));
 
-CREATE TABLE historiqueDepot(
+CREATE TABLE Depot(
 	idPoubelle INT,
         idCorbeille INT,
         idCompte INT,
