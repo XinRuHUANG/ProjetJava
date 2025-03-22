@@ -1,9 +1,6 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
@@ -67,21 +64,25 @@ public class CentreDeTri {
         this.identifiantCentre = identifiantCentre;
         this.nom = nom;
         this.addresse = addresse;
+        this.gerer = new PoubelleIntelligente();
+        this.commercer = new HashSet<Commerce>();
     }
 
     public static CentreDeTri ajouterCentre(String nom, String adresse){
+
         String requete = "SELECT MAX(identifiantCentre) FROM CentreDeTri;";
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantCentre");
-        List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
         int id = Integer.parseInt(infos.getFirst().get("identifiantCentre"));
 
-        CentreDeTri centre = new CentreDeTri(id, nom, adresse);
+        CentreDeTri centre = new CentreDeTri(id+1, nom, adresse);
         //Création dans la base de données
-        requete = "INSERT INTO CentreDeTri(identifiant, nom, adresse) VALUES ("+Integer.toString(id)+","+nom+","+"adresse"+");";
+        requete = "INSERT INTO CentreDeTri(identifiant, nom, adresse) VALUES ("+Integer.toString(id+1)+","+nom+","+"adresse"+");";
         requete(requete);
         return centre;
     }
+
     public void retirerCentre(){
         int identifiant = this.identifiantCentre;
         //Suppresion du centre de la base de données

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static main.TypeDéchetEnum.TypeDechet;
+import static main.TypeDéchetEnumEtConstantes.TypeDechet;
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
@@ -52,11 +52,6 @@ public class Dechet {
 
         Dechet poubelle = new Dechet(id,type);
         requete = "INSERT INTO PoubelleIntelligente(identifiantDechet,type) VALUES ("+Integer.toString(id)+","+type.toString()+");";
-        requete(requete);
-    }
-
-    public void viderDepot(Dechet dechet){
-
         requete(requete);
     }
 }
