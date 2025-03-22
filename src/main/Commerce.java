@@ -9,6 +9,7 @@ public class Commerce {
     private int identifiantCommerce;
     private String nom;
 
+
     //Constructeur
     public Commerce(){
         this.identifiantCommerce = 0;
@@ -20,12 +21,14 @@ public class Commerce {
         this.nom = nom;
     }
 
+
     //Getters et Setters
     public int getIdentifiantCommerce() {return identifiantCommerce;}
     public void setIdentifiantCommerce(int identifiantCommerce) {this.identifiantCommerce = identifiantCommerce;}
 
     public String getNom() {return nom;}
     public void setNom(String nom) {this.nom = nom;}
+
 
     //Modélisation de l'association : commercer
     private Set<CentreDeTri> commercer;
@@ -42,6 +45,7 @@ public class Commerce {
 
     public Set<CentreDeTri> getCommercer() {return commercer;}
     public void setCommercer(Set<CentreDeTri> commercer) {this.commercer = commercer;}
+
 
     //Modelisation de l'association : proposer
     private Set<CategorieDeProduits> proposer;
