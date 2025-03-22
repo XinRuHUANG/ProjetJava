@@ -1,45 +1,91 @@
 package main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
 import static main.outils.connexionSQL.requete;
+import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class CentreDeTri {
+    private int identifiantCentre;
     private String nom;
     private String addresse;
+    //Modélisation des associations
+    private PoubelleIntelligente gerer;
+    private Set<Commerce> commercer;
 
-    public CentreDeTri(String nom, String adresse) {
-        this.nom = nom;
-        this.addresse = adresse;
+    public int getIdentifiantCentre() {
+        return identifiantCentre;
+    }
+
+    public void setIdentifiantCentre(int identifiantCentre) {
+        this.identifiantCentre = identifiantCentre;
     }
 
     public String getNom() {
         return nom;
     }
-    public String getAddresse() {
-        return addresse;
-    }
 
     public void setNom(String nom) {
         this.nom = nom;
     }
+
+    public String getAddresse() {
+        return addresse;
+    }
+
     public void setAddresse(String addresse) {
         this.addresse = addresse;
     }
 
-    public static void ajouterPoubelle(String type, String emplacement, int capaciteMaximale){
-        String requete = "INSERT INTO <Poubelle> (type, emplacement, capacitéMaximale) VALUES ("+type+","+emplacement+","+Integer.toString(capaciteMaximale)+");";
-        requete(requete);
+    public PoubelleIntelligente getGerer() {
+        return gerer;
     }
-    public static void retirerPoubelle(int id){
-        String requete = "DELETE FROM <Poubelle> WHERE <idPoubelle> = " + Integer.toString(id) + ";";
-        requete(requete);
+
+    public void setGerer(PoubelleIntelligente gerer) {
+        this.gerer = gerer;
     }
-    //Normalement il faudrait récupérer le contenu de la poubelle puis changer la base de données mais on va juste changer
-    public static void collecterDechets(int id){
-        String requete = "UPDATE <Poubelle> SET volume = 0 WHERE idPoubelle = " + Integer.toString(id) + ";";
-        requete(requete);
+
+    public Set<Commerce> getCommercer() {
+        return commercer;
     }
-    public static void statistiquerDechets(int id){
-        String requete = "SELECT COUNT(*) FROM Poubelle WHERE idPoubelle =" + Integer.toString(id) + ";";
+
+    public void setCommercer(Set<Commerce> commercer) {
+        this.commercer = commercer;
+    }
+
+    public CentreDeTri(int identifiantCentre, String nom, String addresse, PoubelleIntelligente gerer, Set<Commerce> commercer) {
+        this.identifiantCentre = identifiantCentre;
+        this.nom = nom;
+        this.addresse = addresse;
+        this.gerer = gerer;
+        this.commercer = commercer;
+    }
+    public CentreDeTri(int identifiantCentre, String nom, String addresse) {
+        this.identifiantCentre = identifiantCentre;
+        this.nom = nom;
+        this.addresse = addresse;
+    }
+
+    public static CentreDeTri ajouterCentre(String nom, String adresse){
+        String requete = "SELECT MAX(identifiantCentre) FROM CentreDeTri;";
+        ArrayList<String> attributs = new ArrayList<>();
+        attributs.add("identifiantCentre");
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
+        int id = Integer.parseInt(infos.getFirst().get("identifiantCentre"));
+
+        CentreDeTri centre = new CentreDeTri(id, nom, adresse);
+        //Création dans la base de données
+        requete = "INSERT INTO CentreDeTri(identifiant, nom, adresse) VALUES ("+Integer.toString(id)+","+nom+","+"adresse"+");";
+        requete(requete);
+        return centre;
+    }
+    public void retirerCentre(){
+        int identifiant = this.identifiantCentre;
+        //Suppresion du centre de la base de données
+        String requete = "DELETE FROM CentreDeTri WHERE identifiant = " + Integer.toString(identifiant) + ";";
         requete(requete);
     }
 }
