@@ -49,6 +49,10 @@ public class Promotion {
 
     //Association avec Utilisateur : utiliser
     private Set<Utilisateur> utiliser;
+
+    //Association avec Contrat : definir
     private Contrat definir;
+
+    //Association avec CategorieDeOroduits : concerner
     private CategorieDeProduits concerner;
 }
