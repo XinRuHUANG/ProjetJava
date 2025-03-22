@@ -1,17 +1,28 @@
 package main;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
-
-public class Commerce {
+public class CentreDeTri {
+    private int identifiantCentre;
     private String nom;
+    private String addresse;
+    //Modélisation des associations
+    private PoubelleIntelligente gerer;
+    private Set<Commerce> commercer;
+
+    public int getIdentifiantCentre() {
+        return identifiantCentre;
+    }
+
+    public void setIdentifiantCentre(int identifiantCentre) {
+        this.identifiantCentre = identifiantCentre;
+    }
 
     public String getNom() {
         return nom;
@@ -21,14 +32,60 @@ public class Commerce {
         this.nom = nom;
     }
 
-    public static void definirContrat(int id, int idCommerce, int idCentreTri, String dateDebut, String dateFin){
-        String query = "INSERT INTO Contrat (idCommerce, idCentreTri, dateDebut, dateFin VALUES ("+idCommerce+","+idCentreTri+","+dateDebut+","+dateFin+");";
-        requete(query);
+    public String getAddresse() {
+        return addresse;
     }
 
-    public static void listerProduitsPromo(int idCommerce){
-        String query = "SELECT * FROM Promotion, Commerce WHERE Promotion.idCommerce = Commerce."+idCommerce+";";
-        ArrayList<String> list = new ArrayList<>();
-        requeteAvecAffichage(query,list);
+    public void setAddresse(String addresse) {
+        this.addresse = addresse;
+    }
+
+    public PoubelleIntelligente getGerer() {
+        return gerer;
+    }
+
+    public void setGerer(PoubelleIntelligente gerer) {
+        this.gerer = gerer;
+    }
+
+    public Set<Commerce> getCommercer() {
+        return commercer;
+    }
+
+    public void setCommercer(Set<Commerce> commercer) {
+        this.commercer = commercer;
+    }
+
+    public CentreDeTri(int identifiantCentre, String nom, String addresse, PoubelleIntelligente gerer, Set<Commerce> commercer) {
+        this.identifiantCentre = identifiantCentre;
+        this.nom = nom;
+        this.addresse = addresse;
+        this.gerer = gerer;
+        this.commercer = commercer;
+    }
+    public CentreDeTri(int identifiantCentre, String nom, String addresse) {
+        this.identifiantCentre = identifiantCentre;
+        this.nom = nom;
+        this.addresse = addresse;
+    }
+
+    public static CentreDeTri ajouterCentre(String nom, String adresse){
+        String requete = "SELECT MAX(identifiantCentre) FROM CentreDeTri;";
+        ArrayList<String> attributs = new ArrayList<>();
+        attributs.add("identifiantCentre");
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
+        int id = Integer.parseInt(infos.getFirst().get("identifiantCentre"));
+
+        CentreDeTri centre = new CentreDeTri(id, nom, adresse);
+        //Création dans la base de données
+        requete = "INSERT INTO CentreDeTri(identifiant, nom, adresse) VALUES ("+Integer.toString(id)+","+nom+","+"adresse"+");";
+        requete(requete);
+        return centre;
+    }
+    public void retirerCentre(){
+        int identifiant = this.identifiantCentre;
+        //Suppresion du centre de la base de données
+        String requete = "DELETE FROM CentreDeTri WHERE identifiant = " + Integer.toString(identifiant) + ";";
+        requete(requete);
     }
 }
