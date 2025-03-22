@@ -48,5 +48,4 @@ public class Commerce {
     public Set<CategorieDeProduits> getProposer() {return proposer;}
     public void setProposer(Set<CategorieDeProduits> proposer) {this.proposer = proposer;}
 
-
 }
