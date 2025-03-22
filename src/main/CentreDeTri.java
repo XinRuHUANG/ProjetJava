@@ -88,4 +88,3 @@ public class CentreDeTri {
         String requete = "DELETE FROM CentreDeTri WHERE identifiant = " + Integer.toString(identifiant) + ";";
         requete(requete);
     }
-}
