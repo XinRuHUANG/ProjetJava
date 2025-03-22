@@ -14,6 +14,7 @@ public class Promotion {
         this.pointsRequis = 0;
     }
 
+
     public Promotion(int identifiantPromotion, float pourcentageRemise, float pointsRequis){
         this.identifiantPromotion = identifiantPromotion;
         this.pourcentageRemise = pourcentageRemise;
