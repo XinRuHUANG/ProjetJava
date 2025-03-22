@@ -14,11 +14,13 @@ DROP TABLE IF EXISTS Promotion;
 
 
 CREATE TABLE PoubelleIntelligente(
-	idPoubelle INT AUTO_INCREMENT PRIMARY KEY,
+	idPoubelle INT AUTO_INCREMENT PRIMARY KEY, 
+	idCentreDeTri INT,
         Emplacement String,
 	poidsMax DECIMAL,
         volume DECIMAL,
-        typePoubelle VARCHAR(10);
+        typePoubelle VARCHAR(10),
+	FOREIGN KEY idCentreDeTri REFERENCES CentreTri(idCentreTri));
 
 CREATE TABLE CentreTri(
 	idCentreTri INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,22 +45,30 @@ CREATE TABLE Contrat(
 
 CREATE TABLE Depot(
 	idDepot INT AUTO_INCREMENT PRIMARY KEY,
+	idUtilisateur INT,
         date DATE,
 	heure LocalTime,
-        points DECIMAL);
+        points DECIMAL,
+	FOREIGN KEY idUtilisateur REFERENCES Utilisateur(idUtilisateur));
 
 CREATE TABLE Dechet(
 	idDechet INT AUTO_INCREMENT PRIMARY KEY,
-	type VARCHAR(10));
+	idDepot INT,
+	type VARCHAR(10),
+	FOREIGN KEY idDepot REFERENCES Depot(idDepot));
 
-CREATE TABLE CategorieDeproduits(
+CREATE TABLE CategorieDeProduits(
 	idCat INT AUTO_INCREMENT PRIMARY KEY,
 	nom String);
 
 CREATE TABLE Promotion(
-	idPromotion INT,
+	idPromotion INT AUTO_INCREMENT PRIMARY KEY,
+	idCat INT,
+	idContrat INT
 	pourcentageRemise DECIMAL,
-	ptRequis DECIMAL);
+	ptRequis DECIMAL,
+	FOREIGN KEY idCat REFERENCES CategorieDeProduits(idCat),
+	FOREIGN KEY idContrat REFERENCES Contrat(idContrat));
 
     
 
