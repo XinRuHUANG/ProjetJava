@@ -113,5 +113,5 @@ public class Utilisateur {
         return true;
     }
 
-    public 
+    public
 }
