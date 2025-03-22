@@ -23,8 +23,7 @@ CREATE TABLE PoubelleIntelligente(
 CREATE TABLE CentreTri(
 	idCentreTri INT AUTO_INCREMENT PRIMARY KEY,
         Emplacement String,
-	nomCentreTri VARCHAR(30),
-        FOREIGN KEY (idEmplacement) REFERENCES Emplacement(idEmplacement));
+	nomCentreTri VARCHAR(30));
 
 CREATE TABLE Utilisateur(
 	idUtilisateur INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,12 +38,8 @@ CREATE TABLE Commerce(
 
 CREATE TABLE Contrat(
 	idCommerce INT AUTO_INCREMENT PRIMARY KEY,
-        idCentreTri INT,
 	dateDebut DATE,
-        dateFin DATE,
-	CONSTRAINT pk_Contrat PRIMARY KEY (idCommerce, idCentreTri, dateDebut),
-	FOREIGN KEY fk_commerce(idCommerce) REFERENCES Commerce(idCommerce), 
-	FOREIGN KEY fk_centre(idCentreTri) REFERENCES CentreTri(idCentreTri));
+        dateFin DATE);
 
 CREATE TABLE Depot(
 	idDepot INT AUTO_INCREMENT PRIMARY KEY,
