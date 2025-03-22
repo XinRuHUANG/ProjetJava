@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static main.TypeDéchetEnumEtConstantes.TypeDechet;
+import static main.TypeDéchetEnum.TypeDechet;
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 

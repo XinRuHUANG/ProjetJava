@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static main.outils.connexionSQL.requete;
-import static main.TypeDéchetEnumEtConstantes.TypeDechet;
+import static main.TypeDéchetEnum.TypeDechet;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class Depot {

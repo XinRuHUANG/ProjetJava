@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import static main.TypeDéchetEnumEtConstantes.*;
+import static main.TypeDéchetEnum.*;
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 

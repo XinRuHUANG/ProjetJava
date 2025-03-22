@@ -1,6 +1,6 @@
 package main;
 
-public class TypeDéchetEnumEtConstantes {
+public class TypeDéchetEnum {
 
     //Constantes de poids (évoquées dans le sujet)
     public static final int pp = 14;
