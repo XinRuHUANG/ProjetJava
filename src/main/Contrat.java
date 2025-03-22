@@ -1,15 +1,14 @@
 package main;
 
 import java.util.Date;
-import java.util.import java.sql.Connection;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Set;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
-import static main.Commerce.listerProduitsPromo;
-Set;
 
 public class Contrat {
     private int identifiantContrat;
@@ -19,13 +18,8 @@ public class Contrat {
     //Modélisation des associations
     private Set<Promotion> definir;
 
-
-    int id;
-    String dateDebut;
-    String dateFin;
-
-    public Contrat(int id, String dateDebut, String dateFin) {
-        this.id = id;
+    public Contrat(int identifiantContrat, Date dateDebut, Date dateFin) {
+        this.identifiantContrat = identifiantContrat;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
     }
@@ -33,27 +27,27 @@ public class Contrat {
     public Contrat() {
     }
 
-    public int getId() {
-        return id;
+    public int getIdentifiantContrat() {
+        return identifiantContrat;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setIdentifiantContrat(int identifiantContrat) {
+        this.identifiantContrat = identifiantContrat;
     }
 
-    public String getDateDebut() {
+    public Date getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(String dateDebut) {
+    public void setDateDebut(Date dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public String getDateFin() {
+    public Date getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(String dateFin) {
+    public void setDateFin(Date dateFin) {
         this.dateFin = dateFin;
     }
 
@@ -67,6 +61,5 @@ public class Contrat {
         ArrayList<String> regles = new ArrayList<>();
         requeteAvecAffichage(query, regles);
 
-        listerProduitsPromo(idCommerce);
     }
 }
