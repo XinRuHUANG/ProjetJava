@@ -1,6 +1,7 @@
 package main;
 
-import java.sql.Connection;
+import java.util.Date;
+import java.util.import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,9 +9,17 @@ import java.util.ArrayList;
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 import static main.Commerce.listerProduitsPromo;
-
+Set;
 
 public class Contrat {
+    private int identifiantContrat;
+    private Date dateDebut;
+    private Date dateFin;
+    private String clauses;
+    //Modélisation des associations
+    private Set<Promotion> definir;
+
+
     int id;
     String dateDebut;
     String dateFin;

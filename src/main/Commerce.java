@@ -1,5 +1,7 @@
 package main;
 
+
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +9,13 @@ import java.util.Set;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
+
+public class Commerce {
+    private int identifiantCommerce;
+    private String nom;
+    //modélisation des associations
+    private Set<CentreDeTri> commercer;
+    private Set<CategorieDeProduits> proposer;
 
 public class CentreDeTri {
     private int identifiantCentre;
