@@ -1,31 +1,34 @@
-public class MainTest {
+package tests;
+
+import main.CategorieDeProduits;
+
+public class Main {
     public static void main(String[] args) {
         System.out.println("=== TEST DEPOT ===");
-        TestDepot.main(args);
+        DepotTest.test();
 
         System.out.println("\n=== TEST DECHET ===");
-        TestDechet.main(args);
+        DechetTest.test();
 
         System.out.println("\n=== TEST CATEGORIE DE PRODUITS ===");
-        TestCategorieDeProduits.main(args);
+        CategorieDeProduitsTest.test();
 
         System.out.println("\n=== TEST COMMERCE ===");
-        TestCommerce.main(args);
+        CommerceTest.test();
 
         System.out.println("\n=== TEST CONTRAT ===");
-        TestContrat.main(args);
+        ContratTest.test();
 
         System.out.println("\n=== TEST CENTRE DE TRI ===");
-        TestCentreDeTri.main(args);
+        CentreDeTriTest.test();
 
         System.out.println("\n=== TEST PROMOTION ===");
-        TestPromotion.main(args);
+        PromotionTest.test();
 
         System.out.println("\n=== TEST POUBELLE INTELLIGENTE ===");
-        PoubelleIntelligenteTest.main(args);
+        PoubelleIntelligenteTest.test();
 
         System.out.println("\n=== TEST UTILISATEUR ===");
-        TestUtilisateur.main(args);
+        UtilisateurTest.test();
     }
 }
-
