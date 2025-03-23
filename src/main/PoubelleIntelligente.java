@@ -24,6 +24,9 @@ public class PoubelleIntelligente {
         this.type = type;
     }
 
+    public PoubelleIntelligente() {
+    }
+
     public int getIdentifiantPoubelle() {
         return identifiantPoubelle;
     }
@@ -72,32 +75,47 @@ public class PoubelleIntelligente {
         this.jeter = jeter;
     }
 
-    public static PoubelleIntelligente ajouterPoubelle(TypeDechet type, String emplacement, float capaciteMaximale){
+    @Override
+    public String toString() {
+        return "PoubelleIntelligente{" +
+                "identifiantPoubelle=" + identifiantPoubelle +
+                ", emplacement='" + emplacement + '\'' +
+                ", capaciteMaximale=" + capaciteMaximale +
+                ", type=" + type +
+                ", gerer=" + gerer +
+                ", jeter=" + jeter +
+                '}';
+    }
+
+    public static PoubelleIntelligente ajouterPoubelle(TypeDechet type, String emplacement, float capaciteMaximale) {
         //récupération du dernier identifiant utilisé
         String requete = "SELECT MAX(identifiantPoubelle) FROM PoubelleIntelligente;";
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantPoubelle");
-        List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
         int id = Integer.parseInt(infos.getFirst().get("identifiantPoubelle"));
 
-        PoubelleIntelligente poubelle = new PoubelleIntelligente(id, emplacement, capaciteMaximale, type);
-        requete = "INSERT INTO PoubelleIntelligente(identifiant, type, emplacement, capacitéMaximale) VALUES ("+ Integer.toString(id)+","+type.toString()+","+emplacement+","+Float.toString(capaciteMaximale)+");";
+        PoubelleIntelligente poubelle = new PoubelleIntelligente(id + 1, emplacement, capaciteMaximale, type);
+        requete = "INSERT INTO PoubelleIntelligente(identifiant, type, emplacement, capacitéMaximale) VALUES (" + Integer.toString(id + 1) + "," + type.toString() + "," + emplacement + "," + Float.toString(capaciteMaximale) + ");";
         requete(requete);
         return poubelle;
     }
-    public static void retirerPoubelle(PoubelleIntelligente poubelle){
-        int id = poubelle.identifiantPoubelle;
+
+    public void retirerPoubelle() {
+        int id = this.identifiantPoubelle;
         String requete = "DELETE FROM PoubelleIntelligente WHERE identifiant =" + Integer.toString(id) + ";";
         requete(requete);
     }
+
     //On va juste vider la poubelle "fictivement"
-    public static void collecterDechets(int id){
-        String requete = "UPDATE PoubelleIntelligente SET volume = 0 WHERE idPoubelle = " + Integer.toString(id) + ";";
+    public static void collecterDechets(int id) {
+        String requete = "DELETE FROM stocker WHERE identifiantPoubelle = " + Integer.toString(id) + ";";
     }
 
     //méthodes non traitées
-    public static void statistiquerDechets(){}
-
+    public static void statistiquerDechets() {
+    }
+    /*
     public static int calculerPoids(int idPoubelle){
         int somme = 0;
         ArrayList<String> attributs = new ArrayList<>();
@@ -129,9 +147,7 @@ public class PoubelleIntelligente {
         }
         return somme;
     }
-    public boolean verifierNature(String typeDechet, String typePoubelle){
-        return typeDechet.equals(typePoubelle);
-    }
+
     public int ajouterPoints(int idCompte, int quantite){
         return quantite * 10;
     }
@@ -159,4 +175,6 @@ public class PoubelleIntelligente {
 
     //méthodes non implémentées
     public void mesurerPoids(){}
+*/
 }
+

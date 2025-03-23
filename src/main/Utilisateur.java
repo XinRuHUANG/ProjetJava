@@ -72,6 +72,18 @@ public class Utilisateur {
         this.utiliser = utiliser;
     }
 
+    @Override
+    public String toString() {
+        return "Utilisateur{" +
+                "identifiantUtilisateur=" + identifiantUtilisateur +
+                ", nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", pointsFidelite=" + pointsFidelite +
+                ", posseder=" + posseder +
+                ", utiliser=" + utiliser +
+                '}';
+    }
+
     public static Utilisateur creerCompte(String nom, String prenom, float pointsFidelite){
         String requete = "SELECT MAX(identifiantUtilisateur) FROM Utilisateur;";
         ArrayList<String> attributs = new ArrayList<>();
@@ -84,5 +96,32 @@ public class Utilisateur {
         requete = "INSERT INTO Utilisateur(identifiantUtilisateur, nom, prenom, pointsFidelite) VALUES ("+Integer.toString(id)+","+nom+","+prenom+","+ Float.toString(pointsFidelite)+");";
         requete(requete);
         return util;
+    }
+
+    /**On vérifie que l'utilisateur a les points pour obtenir la promotion et si tel est le cas on considère qu'il a reçu sa promotion et on lui change ses points de fidélité*/
+    public boolean utiliserPoints(Promotion promo){
+        int identifiantPromotion = promo.getIdentifiantPromotion();
+
+        //récupération des informations du nombre de points requis pour la promotion
+
+        String requete = "SELECT pointsRequis FROM Promotion WHERE identifiantPromotion = " + Integer.toString(identifiantPromotion) ;
+        ArrayList<String> attributs = new ArrayList<>();
+        attributs.add("pointsRequis");
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
+        float pointsRequis =  Float.parseFloat(infos.getFirst().get("pointsRequis"));
+
+        //vérification du nombre de points
+        if (pointsRequis > this.pointsFidelite){
+            return false;
+        }
+
+        /*soustraction des points de fidélité aux points requis*/
+        //SQL
+        float pointFidelite = this.pointsFidelite - pointsRequis;
+        requete = "UPDATE Utilisateur SET pointsFidelite = " + Float.toString(pointFidelite) + " WHERE identifiantPromotion = " + Integer.toString(identifiantPromotion) + ";";
+        requete(requete);
+        //Java
+        this.pointsFidelite -= pointsRequis;
+        return true;
     }
 }

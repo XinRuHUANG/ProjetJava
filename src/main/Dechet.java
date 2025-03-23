@@ -43,20 +43,26 @@ public class Dechet {
         this.contenir = contenir;
     }
 
-    public static void ajouterDechet(TypeDechet type){
+    @Override
+    public String toString() {
+        return "Dechet{" +
+                "identifiantDechet=" + identifiantDechet +
+                ", type=" + type +
+                ", contenir=" + contenir +
+                '}';
+    }
+
+    public static Dechet ajouterDechet(TypeDechet type){
         String requete = "SELECT MAX(identifiantDechet) FROM Dechet;";
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantDechet");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
         int id = Integer.parseInt(infos.getFirst().get("identifiantDechet"));
 
-        Dechet poubelle = new Dechet(id,type);
+        Dechet dechet = new Dechet(id,type);
         requete = "INSERT INTO PoubelleIntelligente(identifiantDechet,type) VALUES ("+Integer.toString(id)+","+type.toString()+");";
         requete(requete);
-    }
 
-    public void viderDepot(Dechet dechet){
-
-        requete(requete);
+        return dechet;
     }
 }

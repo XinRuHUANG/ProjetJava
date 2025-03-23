@@ -100,6 +100,3 @@ public class CentreDeTri {
         String requete = "DELETE FROM CentreDeTri WHERE identifiantCentre = " + Integer.toString(identifiant) + ";";
         requete(requete);
     }
-
-
-}
