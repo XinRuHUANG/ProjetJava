@@ -84,8 +84,8 @@ public class CentreDeTri {
         return centre;
     }
 
-    public void retirerCentre() {
-        int identifiant = this.identifiantCentre;
+    public void retirerCentre(int identifiantCentre) {
+        int identifiant = identifiantCentre;
         //Suppresion du centre de la base de données
         String requete = "DELETE FROM CentreDeTri WHERE identifiant = " + Integer.toString(identifiant) + ";";
         requete(requete);
