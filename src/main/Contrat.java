@@ -1,10 +1,10 @@
 package main;
 
-import java.util.Date;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static main.outils.connexionSQL.requete;
@@ -12,20 +12,19 @@ import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class Contrat {
     private int identifiantContrat;
-    private Date dateDebut;
-    private Date dateFin;
+    private LocalDate dateDebut;
+    private LocalDate dateFin;
     private String clauses;
     //Modélisation des associations
     private Set<Promotion> definir;
 
-    public Contrat(int identifiantContrat, Date dateDebut, Date dateFin) {
+    public Contrat(int identifiantContrat, LocalDate dateDebut, LocalDate dateFin, String clauses) {
         this.identifiantContrat = identifiantContrat;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
+        this.clauses = clauses;
     }
-
-    public Contrat() {
-    }
+    public Contrat(){}
 
     public int getIdentifiantContrat() {
         return identifiantContrat;
@@ -35,31 +34,68 @@ public class Contrat {
         this.identifiantContrat = identifiantContrat;
     }
 
-    public Date getDateDebut() {
+    public LocalDate getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(Date dateDebut) {
+    public void setDateDebut(LocalDate dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public Date getDateFin() {
+    public LocalDate getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(Date dateFin) {
+    public void setDateFin(LocalDate dateFin) {
         this.dateFin = dateFin;
     }
 
-    public static void renouvelerContrat(int id, int idCommerce, int idCentreTri, String newDateDebut, String newDateFin){
-        String query = "UPDATE Contrat SET dateDebut = "+newDateDebut+", dateFin = "+newDateFin+" WHERE id = "+id+";";
-        requete(query);
+    public String getClauses() {
+        return clauses;
     }
 
-    public void lireRegles(int idCommerce){
-        String query = "SELECT pourcentageRemise, ptRequis, dateDebut, dateFin FROM Contrat, Promotion";
-        ArrayList<String> regles = new ArrayList<>();
-        requeteAvecAffichage(query, regles);
+    public void setClauses(String clauses) {
+        this.clauses = clauses;
+    }
 
+    public Set<Promotion> getDefinir() {
+        return definir;
+    }
+
+    public void setDefinir(Set<Promotion> definir) {
+        this.definir = definir;
+    }
+
+    @Override
+    public String toString() {
+        return "Contrat{" +
+                "identifiantContrat=" + identifiantContrat +
+                ", dateDebut=" + dateDebut +
+                ", dateFin=" + dateFin +
+                ", clauses='" + clauses + '\'' +
+                ", definir=" + definir +
+                '}';
+    }
+
+    public static Contrat definirContrat(LocalDate dateDebut, LocalDate dateFin, String clauses){
+
+        //récupération du dernier identifiant dans la BDD
+        String requete = "SELECT MAX(identifiantContrat) FROM Contrat;";
+        ArrayList<String> attributs = new ArrayList<>();
+        attributs.add("identifiantContrat");
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
+        int identifiantContrat = Integer.parseInt(infos.getFirst().get("identifiantContrat")) + 1;
+        Contrat contrat = new Contrat(identifiantContrat, dateDebut, dateFin, clauses);
+        //Création dans la base de données
+        requete = "INSERT INTO Contrat(identifiantContrat, dateDebut, dateFin, clauses) VALUES ("+Integer.toString(identifiantContrat)+","+dateDebut.toString()+","+dateFin.toString()+","+clauses+");";
+        requete(requete);
+
+        return contrat;
+    }
+    public void supprimerContrat(){
+        int identifiantContrat = this.identifiantContrat;
+        //Suppresion le contrat de la base de données
+        String requete = "DELETE FROM Contrat WHERE identifiantContrat = " + Integer.toString(identifiantContrat) + ";";
+        requete(requete);
     }
 }
