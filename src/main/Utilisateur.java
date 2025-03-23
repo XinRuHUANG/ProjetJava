@@ -72,6 +72,18 @@ public class Utilisateur {
         this.utiliser = utiliser;
     }
 
+    @Override
+    public String toString() {
+        return "Utilisateur{" +
+                "identifiantUtilisateur=" + identifiantUtilisateur +
+                ", nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", pointsFidelite=" + pointsFidelite +
+                ", posseder=" + posseder +
+                ", utiliser=" + utiliser +
+                '}';
+    }
+
     public static Utilisateur creerCompte(String nom, String prenom, float pointsFidelite){
         String requete = "SELECT MAX(identifiantUtilisateur) FROM Utilisateur;";
         ArrayList<String> attributs = new ArrayList<>();
@@ -112,6 +124,4 @@ public class Utilisateur {
         this.pointsFidelite -= pointsRequis;
         return true;
     }
-
-    public
 }

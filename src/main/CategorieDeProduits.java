@@ -49,6 +49,16 @@ public class CategorieDeProduits {
         this.proposer = proposer;
     }
 
+    @Override
+    public String toString() {
+        return "CategorieDeProduits{" +
+                "identifiantCategorie=" + identifiantCategorie +
+                ", nom='" + nom + '\'' +
+                ", concerner=" + concerner +
+                ", proposer=" + proposer +
+                '}';
+    }
+
     public CategorieDeProduits(int identifiantCategorie, String nom) {
         this.identifiantCategorie = identifiantCategorie;
         this.nom = nom;
@@ -69,8 +79,8 @@ public class CategorieDeProduits {
         requete(requete);
         return categorie;
     }
-    public void supprimerCategorie(CategorieDeProduits categorie){
-        int identificationCategorie = categorie.identifiantCategorie;
+    public void supprimerCategorie(){
+        int identificationCategorie = this.identifiantCategorie;
         //Suppression dans la BDD
         String requete = "DELETE FROM CategorieDeProduits WHERE identificationCategorie = " + Integer.toString(identificationCategorie) + ";";
         requete(requete);

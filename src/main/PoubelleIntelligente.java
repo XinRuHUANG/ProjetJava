@@ -75,6 +75,18 @@ public class PoubelleIntelligente {
         this.jeter = jeter;
     }
 
+    @Override
+    public String toString() {
+        return "PoubelleIntelligente{" +
+                "identifiantPoubelle=" + identifiantPoubelle +
+                ", emplacement='" + emplacement + '\'' +
+                ", capaciteMaximale=" + capaciteMaximale +
+                ", type=" + type +
+                ", gerer=" + gerer +
+                ", jeter=" + jeter +
+                '}';
+    }
+
     public static PoubelleIntelligente ajouterPoubelle(TypeDechet type, String emplacement, float capaciteMaximale) {
         //récupération du dernier identifiant utilisé
         String requete = "SELECT MAX(identifiantPoubelle) FROM PoubelleIntelligente;";
@@ -89,8 +101,8 @@ public class PoubelleIntelligente {
         return poubelle;
     }
 
-    public static void retirerPoubelle(PoubelleIntelligente poubelle) {
-        int id = poubelle.identifiantPoubelle;
+    public void retirerPoubelle() {
+        int id = this.identifiantPoubelle;
         String requete = "DELETE FROM PoubelleIntelligente WHERE identifiant =" + Integer.toString(id) + ";";
         requete(requete);
     }

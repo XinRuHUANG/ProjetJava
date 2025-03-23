@@ -83,6 +83,18 @@ public class Depot {
         this.contenir = contenir;
     }
 
+    @Override
+    public String toString() {
+        return "Depot{" +
+                "identifiantDepot=" + identifiantDepot +
+                ", heure=" + heure +
+                ", points=" + points +
+                ", jeter=" + jeter +
+                ", posseder=" + posseder +
+                ", contenir=" + contenir +
+                '}';
+    }
+
     public static Depot creerDepot(Utilisateur util, List<Dechet> dechets){
 
         //récupération du dernier identifiant dans la BDD
@@ -107,6 +119,16 @@ public class Depot {
         int identifiantDepot = this.identifiantDepot;
         //ajout en parallèle sur SQL
         String requete = "INSERT INTO contenir(identifiantDechet, identifiantDepot) VALUES ("+Integer.toString(identifiantDechet)+","+Integer.toString(identifiantDepot)+");";
+        requete(requete);
+    }
+
+    public void retirerDechet(Dechet dechet){
+        this.contenir.remove(dechet);
+        int identifiantDechet = dechet.getIdentifiantDechet();
+        int identifiantDepot = this.identifiantDepot;
+        //ajout en parallèle sur SQL
+        String requete = "DELETE FROM contenir WHERE identifiantDechet = " + Integer.toString(identifiantDechet) + " AND identifiantDepot = " + Integer.toString(identifiantDepot) + ";";
+        requete(requete);
     }
 
     /*Dans le prochain programme, il faut fournir une liste de poubelles "poubelles "et une liste de listes d'indices "indices_dechets".

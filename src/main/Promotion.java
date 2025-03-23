@@ -1,6 +1,12 @@
 package main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+
+import static main.outils.connexionSQL.requete;
+import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class Promotion {
     private int identifiantPromotion;
@@ -63,5 +69,36 @@ public class Promotion {
         this.identifiantPromotion = identifiantPromotion;
         this.pourcentageRemise = pourcentageRemise;
         this.pointsRequis = pointsRequis;
+    }
+
+    @Override
+    public String toString() {
+        return "Promotion{" +
+                "identifiantPromotion=" + identifiantPromotion +
+                ", pourcentageRemise=" + pourcentageRemise +
+                ", pointsRequis=" + pointsRequis +
+                ", utiliser=" + utiliser +
+                ", definir=" + definir +
+                ", concerner=" + concerner +
+                '}';
+    }
+
+    public static Promotion ajouterPromotion(float pourcentageRemise, float pointsRequis){
+        String requete = "SELECT MAX(identifiantPromotion) FROM Promotion;";
+        ArrayList<String> attributs = new ArrayList<>();
+        attributs.add("identifiantPromotion");
+        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
+        int id = Integer.parseInt(infos.getFirst().get("identifiantPromotion")) + 1;
+
+        Promotion promotion = new Promotion(id, pourcentageRemise, pointsRequis);
+        //Création dans la base de données
+        requete = "INSERT INTO Promotion(identifiantPromotion, pourcentageRemise, pointsRequis) VALUES (" + Integer.toString(id) + "," + Float.toString(pourcentageRemise) + "," + Float.toString(pointsRequis) + ");";
+        requete(requete);
+        return promotion;
+    }
+
+    public void retirerPromotion(){
+        int identifiantPromotion = this.identifiantPromotion;
+        String requete = "DELETE FROM Promotion WHERE identifiant = " + Integer.toString(identifiantPromotion) + ";";
     }
 }

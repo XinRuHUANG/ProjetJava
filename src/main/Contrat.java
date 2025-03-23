@@ -66,6 +66,17 @@ public class Contrat {
         this.definir = definir;
     }
 
+    @Override
+    public String toString() {
+        return "Contrat{" +
+                "identifiantContrat=" + identifiantContrat +
+                ", dateDebut=" + dateDebut +
+                ", dateFin=" + dateFin +
+                ", clauses='" + clauses + '\'' +
+                ", definir=" + definir +
+                '}';
+    }
+
     public static Contrat definirContrat(LocalDate dateDebut, LocalDate dateFin, String clauses){
 
         //récupération du dernier identifiant dans la BDD
@@ -81,8 +92,8 @@ public class Contrat {
 
         return contrat;
     }
-    public void supprimerContrat(Contrat contrat){
-        int identifiantContrat = contrat.identifiantContrat;
+    public void supprimerContrat(){
+        int identifiantContrat = this.identifiantContrat;
         //Suppresion le contrat de la base de données
         String requete = "DELETE FROM Contrat WHERE identifiantContrat = " + Integer.toString(identifiantContrat) + ";";
         requete(requete);

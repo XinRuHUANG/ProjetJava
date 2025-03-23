@@ -53,6 +53,17 @@ public class CentreDeTri {
         this.commercer = commercer;
     }
 
+    @Override
+    public String toString() {
+        return "CentreDeTri{" +
+                "identifiantCentre=" + identifiantCentre +
+                ", nom='" + nom + '\'' +
+                ", addresse='" + addresse + '\'' +
+                ", gerer=" + gerer +
+                ", commercer=" + commercer +
+                '}';
+    }
+
     public CentreDeTri(int identifiantCentre, String nom, String addresse, PoubelleIntelligente gerer, Set<Commerce> commercer) {
         this.identifiantCentre = identifiantCentre;
         this.nom = nom;
@@ -89,4 +100,6 @@ public class CentreDeTri {
         String requete = "DELETE FROM CentreDeTri WHERE identifiantCentre = " + Integer.toString(identifiant) + ";";
         requete(requete);
     }
+
+
 }
