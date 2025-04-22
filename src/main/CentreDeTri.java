@@ -1,105 +1,71 @@
 package main;
 
-import java.util.*;
-
-import static main.outils.connexionSQL.requete;
-import static main.outils.connexionSQL.requeteAvecAffichage;
+import java.util.List;
+import java.util.Set;
+import static main.CentreDeTriDAO.ajouterCentreBDD;
 
 public class CentreDeTri {
-    private int identifiantCentre;
+
+    //Attributs de la classe CentreDeTri
+    private int idCentreDeTri;
     private String nom;
-    private String addresse;
-    //Modélisation des associations
-    private PoubelleIntelligente gerer;
-    private Set<Commerce> commercer;
+    private String adresse;
 
-    public int getIdentifiantCentre() {
-        return identifiantCentre;
-    }
+    //Modélisation des liaisons
+    private Set<PoubelleIntelligente> poubelles;
+    private List<Commerce> commerce;
+    private List<Contrat> contrats;
 
-    public void setIdentifiantCentre(int identifiantCentre) {
-        this.identifiantCentre = identifiantCentre;
-    }
 
-    public String getNom() {
-        return nom;
-    }
+    //Getter et Setter
+    public int getIdCentreDeTri() {return idCentreDeTri;}
+    public void setIdCentreDeTri(int idCentreDeTri) {this.idCentreDeTri = idCentreDeTri;}
 
-    public void setNom(String nom) {
+    public String getNom() {return nom;}
+    public void setNom(String nom) {this.nom = nom;}
+
+    public String getAdresse() {return adresse;}
+    public void setAdresse(String adresse) {this.adresse = adresse;}
+
+    public Set<PoubelleIntelligente> getPoubelles() {return poubelles;}
+    public void setPoubelles(Set<PoubelleIntelligente> poubelles) {this.poubelles = poubelles;}
+
+    public List<Commerce> getCommerce() {return commerce;}
+    public void setCommerce(List<Commerce> commerce) {this.commerce = commerce;}
+
+    public List<Contrat> getContrats() {return contrats;}
+    public void setContrats(List<Contrat> contrats) {this.contrats = contrats;}
+
+    //Constructeur
+    public CentreDeTri(int idCentreDeTri, String nom, String adresse, Set<PoubelleIntelligente> poubelleIntelligente, List<Commerce> commerce, List<Contrat> contrats) {
+        this.idCentreDeTri = idCentreDeTri;
         this.nom = nom;
+        this.adresse = adresse;
+        this.poubelles = poubelleIntelligente;
+        this.commerce = commerce;
+        this.contrats = contrats;
     }
 
-    public String getAddresse() {
-        return addresse;
+    //Méthodes de classes
+    public static CentreDeTri ajouterCentre(int idCentreDeTri, String nom, String adresse, Set<PoubelleIntelligente> poubelleIntelligente, List<Commerce> commerce, List<Contrat> contrats){
+        CentreDeTri centreDeTri = new CentreDeTri(idCentreDeTri, nom, adresse, poubelleIntelligente, commerce, contrats);
+        ajouterCentreBDD(centreDeTri);
+        return centreDeTri;
     }
 
-    public void setAddresse(String addresse) {
-        this.addresse = addresse;
-    }
 
-    public PoubelleIntelligente getGerer() {
-        return gerer;
-    }
-
-    public void setGerer(PoubelleIntelligente gerer) {
-        this.gerer = gerer;
-    }
-
-    public Set<Commerce> getCommercer() {
-        return commercer;
-    }
-
-    public void setCommercer(Set<Commerce> commercer) {
-        this.commercer = commercer;
+    public void ajouterContrat(Contrat contrat){
+        contrats.add(contrat);
     }
 
     @Override
     public String toString() {
         return "CentreDeTri{" +
-                "identifiantCentre=" + identifiantCentre +
+                "idCentreDeTri=" + idCentreDeTri +
                 ", nom='" + nom + '\'' +
-                ", addresse='" + addresse + '\'' +
-                ", gerer=" + gerer +
-                ", commercer=" + commercer +
+                ", adresse='" + adresse + '\'' +
+                ", poubelleIntelligente=" + poubelles +
+                ", commerce=" + commerce +
                 '}';
     }
-
-    public CentreDeTri(int identifiantCentre, String nom, String addresse, PoubelleIntelligente gerer, Set<Commerce> commercer) {
-        this.identifiantCentre = identifiantCentre;
-        this.nom = nom;
-        this.addresse = addresse;
-        this.gerer = gerer;
-        this.commercer = commercer;
-    }
-    public CentreDeTri(int identifiantCentre, String nom, String addresse) {
-        this.identifiantCentre = identifiantCentre;
-        this.nom = nom;
-        this.addresse = addresse;
-        this.gerer = new PoubelleIntelligente();
-        this.commercer = new HashSet<Commerce>();
-    }
-
-    public static CentreDeTri ajouterCentre(String nom, String adresse){
-
-        String requete = "SELECT MAX(identifiantCentre) FROM CentreDeTri;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantCentre");
-        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantCentre"));
-
-        CentreDeTri centre = new CentreDeTri(id+1, nom, adresse);
-        //Création dans la base de données
-        requete = "INSERT INTO CentreDeTri(identifiant, nom, adresse) VALUES ("+Integer.toString(id+1)+","+nom+","+"adresse"+");";
-        requete(requete);
-        return centre;
-    }
-
-    public void retirerCentre(){
-        int identifiant = this.identifiantCentre;
-        //Suppresion du centre de la base de données
-        String requete = "DELETE FROM CentreDeTri WHERE identifiantCentre = " + Integer.toString(identifiant) + ";";
-        requete(requete);
-    }
-
-
 }

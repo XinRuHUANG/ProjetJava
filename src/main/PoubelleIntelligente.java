@@ -14,7 +14,7 @@ public class PoubelleIntelligente {
     private float capaciteMaximale;
     private TypeDechet type;
     //modélisation des associations
-    private Set<CentreDeTri> gerer;
+    private CentreDeTri gerer;
     private Set<Depot> jeter;
 
     public PoubelleIntelligente(int identifiantPoubelle, String emplacement, float capaciteMaximale, TypeDechet type) {

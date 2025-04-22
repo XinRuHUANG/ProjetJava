@@ -47,6 +47,8 @@ public class Commerce {
         this.proposer = proposer;
     }
 
+
+
     @Override
     public String toString() {
         return "Commerce{" +
