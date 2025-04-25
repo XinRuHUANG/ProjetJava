@@ -115,7 +115,15 @@ public class Depot {
         this.contenir = contenir;
     }
 
+
+
+    //Methode de Classe
     public static Depot creerDepot(Utilisateur util, List<Dechet> dechets){
+        /*Crée un nouveau dépôt pour un utilisateur avec une liste de déchets.
+         * @param util L'utilisateur à l'origine du dépôt.
+         * @param dechets La liste des déchets contenus dans le dépôt.
+         * @return Le dépôt nouvellement créé.
+         */
         LocalDate dateProperty = LocalDate.now();
         LocalTime heure = LocalTime.now();
         Depot depot = new Depot(0, dateProperty, heure, 0.0f, "verre", 0.5f);
@@ -125,12 +133,18 @@ public class Depot {
     }
 
     public void supprimerDepot(){
+        /*Supprime ce dépôt de la base de données.
+         */
         supprimerDepotBDD(this);
     }
 
     public void modifierDepot(Map<String, Object> modifications) {
-        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
-         * {ième attribut = ième valeur}*/
+        /* Modifie les attributs du dépôt selon les valeurs spécifiées dans la map.
+         *
+         * @param modifications Une map contenant les attributs à modifier, sous la forme :
+         *                      {"date"=valeur, "heure"=valeur, "points"=valeur,
+         *                      "jeter"=valeur, "posseder"=valeur, "contenir"=valeur}.
+         */
         for(Map.Entry<String, Object> entry: modifications.entrySet()) {
             String cle = entry.getKey();
             Object obj = entry.getValue();
@@ -169,16 +183,18 @@ public class Depot {
 
 
     public void ajouterDechetDepot(Dechet dechet){
-        //ajout du déchet dans java
+        /*Ajoute un déchet à ce dépôt, à la fois dans l'objet Java et dans la base de données
+         * @param dechet Le déchet à ajouter au dépôt.
+         */
         this.contenir.add(dechet);
-        //ajout du déchet dans la BDD
         ajouterDechetDepotBDD(this, dechet);
     }
 
     public void retirerDechetDepot(Dechet dechet){
-        //suppression du déchet dans java
+        /* Retire un déchet de ce dépôt, à la fois dans l'objet Java et dans la base de données.
+         * @param dechet Le déchet à retirer du dépôt.
+         */
         this.contenir.remove(dechet);
-        //suppresion du déchet dans la BDD
         supprimerDechetDepotBDD(this, dechet);
     }
 
@@ -187,6 +203,11 @@ public class Depot {
     */
 
     public static boolean verifierNature(Dechet dechet, PoubelleIntelligente poubelle){
+        /*Vérifie si le type d'un déchet correspond au type accepté par une poubelle intelligente.
+         * @param dechet Le déchet à vérifier.
+         * @param poubelle La poubelle intelligente avec laquelle comparer le type.
+         * @return true si le type du déchet correspond à celui de la poubelle, false sinon.
+         */
         return dechet.getType() == poubelle.getType();
     }
 
