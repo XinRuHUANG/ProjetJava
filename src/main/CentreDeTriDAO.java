@@ -98,12 +98,13 @@ public class CentreDeTriDAO extends CentreDeTri{
 
     public static void supprimerCentreBDD(CentreDeTri centredetri){
         int identifiantCentreDeTri = centredetri.getIdCentreDeTri();
-        String requete = "DELETE FROM CentreDeTri WHERE identifiantCentreDeTri =" + Integer.toString(identifiantCentreDeTri) + ";";
-        requete(requete);
-        requete = "DELETE FROM commercer WHERE identifiantCentreDeTri =" + Integer.toString(identifiantCentreDeTri) + ";";
+        String requete = "DELETE FROM commercer WHERE identifiantCentreDeTri =" + Integer.toString(identifiantCentreDeTri) + ";";
         requete(requete);
         requete = "DELETE FROM gerer WHERE identifiantCentreDeTri =" + Integer.toString(identifiantCentreDeTri) + ";";
         requete(requete);
+        requete = "DELETE FROM CentreDeTri WHERE identifiantCentreDeTri =" + Integer.toString(identifiantCentreDeTri) + ";";
+        requete(requete);
+
     }
 
 }
