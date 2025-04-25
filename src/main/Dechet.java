@@ -50,12 +50,21 @@ public class Dechet {
 
     //Methodes de Classes
     public static Dechet ajouterDechet(TypeDechet type, Depot contenir, PoubelleIntelligente stocker) {
+        /*Crée et ajoute un nouveau déchet à la base de données.
+         *
+         * @param type Le type du déchet.
+         * @param contenir Le dépôt dans lequel le déchet est contenu.
+         * @param stocker La poubelle intelligente qui stocke le déchet.
+         * @return Le déchet nouvellement créé.
+         */
         Dechet dechet = new Dechet(0, type, contenir, stocker);
         ajouterDechetBDD(dechet);
         return dechet;
     }
 
     public void supprimerDechet() {
+        /* Supprime ce déchet de la base de données.
+         */
         supprimerDechetBDD(this);
     }
     public void modifierDechet(Map<String, Object> modifications){
