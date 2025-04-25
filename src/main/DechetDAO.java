@@ -3,7 +3,6 @@ package main;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
@@ -22,7 +21,7 @@ public class DechetDAO {
 
         //Récupérer les infos du déchet
         dechet.setIdentifiantDechet(id);
-        TypeDechetEnum type = dechet.getType(); // enum -> String
+        TypeDechet type = dechet.getType(); // enum -> String
         Depot contenir = dechet.getContenir();
         int idDepot = contenir.getIdentifiantDepot();  // Obtenir l'identifiant du dépôt via la classe depot
 
@@ -31,9 +30,11 @@ public class DechetDAO {
                 id + "," + type + "," + idDepot + ");";
         //Exécuter la requête
         requete(sql);
+
+
     }
 
-    public static void retirerDechetBDD(Dechet dechet) {
+    public static void supprimerDechetBDD(Dechet dechet) {
         int id = dechet.getIdentifiantDechet();
         //Suppression du déchet de la table contenir
         String requete = "DELETE FROM contenir WHERE idDechet = " + id + ";";
