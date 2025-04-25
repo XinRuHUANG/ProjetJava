@@ -5,6 +5,8 @@ import java.util.*;
 import static main.CommerceDAO.*;
 
 public class Commerce {
+
+    //attributs
     private int identifiantCommerce;
     private String nom;
     //modélisation des associations
@@ -38,7 +40,15 @@ public class Commerce {
         this.proposer = proposer;
     }
 
+    //Methode de classe
     public static Commerce ajouterCommerce(String nom, List<CentreDeTri> commercer, List<Contrat> contrats, Set<CategorieDeProduits> proposer){
+        /* Crée et ajoute un nouveau commerce à la base de données.
+         * @param nom Le nom du commerce.
+         * @param commercer La liste des centres de tri avec lesquels le commerce est lié.
+         * @param contrats La liste des contrats associés au commerce.
+         * @param proposer L'ensemble des catégories de produits proposées par le commerce.
+         * @return Le commerce nouvellement créé.
+         */
         Commerce commerce = new Commerce(0,nom, commercer, contrats, proposer);
         ajouterCommerceBDD(commerce);
         return commerce;
