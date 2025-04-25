@@ -75,19 +75,36 @@ public class PoubelleIntelligente {
 
     public void setStocker(Set<Dechet> stocker) {this.stocker = stocker;}
 
+    //Methode de classe
     public static PoubelleIntelligente ajouterPoubelle(String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter, Set<Dechet> stocker) {
-        PoubelleIntelligente poubelle = new PoubelleIntelligente(0,emplacement, capaciteMaximale, type, poids, gerer, jeter, stocker);
+        /*Crée une nouvelle poubelle intelligente et l'ajoute à la base de données.
+         *
+         * @param emplacement L'emplacement de la poubelle.
+         * @param capaciteMaximale La capacité maximale de la poubelle (en kg).
+         * @param type Le type de déchet accepté par la poubelle.
+         * @param poids Le poids actuel des déchets dans la poubelle.
+         * @param gerer Le centre de tri responsable de cette poubelle.
+         * @param jeter Les dépôts liés à cette poubelle.
+         * @param stocker Les déchets actuellement stockés dans la poubelle.
+         * @return La poubelle nouvellement créée.
+         */
+        PoubelleIntelligente poubelle = new PoubelleIntelligente(0, emplacement, capaciteMaximale, type, poids, gerer, jeter, stocker);
         ajouterPoubelleBDD(poubelle);
         return poubelle;
     }
 
     public void retirerPoubelle() {
+        /*Supprime cette poubelle de la base de données.
+         */
         supprimerPoubelleBDD(this);
     }
 
     public void modifierPoubelle(Map<String, Object> modifications) {
-        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
-         * {ième attribut = ième valeur}*/
+        /* Modifie les attributs de la poubelle selon les valeurs spécifiées dans la map.
+         *
+         * @param modifications Une map contenant les attributs à modifier :
+         *                      {"emplacement", "capaciteMaximale", "type", "poids", "gerer", "jeter", "stocker"}.
+         */
         for (Map.Entry<String, Object> entry : modifications.entrySet()) {
             String cle = entry.getKey();
             Object obj = entry.getValue();
@@ -129,33 +146,45 @@ public class PoubelleIntelligente {
         }
     }
 
-    //On va juste vider la poubelle "fictivement"
     public void collecterDechets() {
-        //vidage de la poubelle côté JAVA
+        /*Vide la poubelle de manière logique (réinitialise le poids et efface les déchets stockés).
+        */
         this.poids = 0;
         this.stocker.clear();
-        //vidage de la poubelle côté SQL
         collecterDechetsBDD(this);
     }
 
-    //méthode non traitée
+    /**
+     * Méthode non implémentée — prévue pour générer des statistiques sur les déchets.
+     */
     public void statistiquerDechets() {
+        // À implémenter
     }
 
-    public boolean notifierCentre(PoubelleIntelligente poubelleIntelligente){
+    public boolean notifierCentre(PoubelleIntelligente poubelleIntelligente) {
+        /*Notifie le centre de tri si la poubelle dépasse sa capacité maximale.
+         *
+         * @param poubelleIntelligente La poubelle à évaluer.
+         * @return true si la capacité est dépassée, false sinon.
+         */
         return (this.poids > this.capaciteMaximale);
     }
 
-    public float ajouterPoids(Set<TypeDechetEnum> dechets){
+    public float ajouterPoids(Set<TypeDechetEnum> dechets) {
+        /*Ajoute le poids des types de déchets spécifiés et met à jour le poids total de la poubelle.
+         *
+         * @param dechets Un ensemble de types de déchets à ajouter.
+         * @return Le poids total ajouté.
+         */
         float poids = 0;
-        for (TypeDechetEnum type: dechets){
-            if (type.equals(verre)){
+        for (TypeDechetEnum type : dechets) {
+            if (type.equals(verre)) {
                 poids += pv;
-            } else if (type.equals(carton)){
+            } else if (type.equals(carton)) {
                 poids += pc;
-            } else if (type.equals(plastique)){
+            } else if (type.equals(plastique)) {
                 poids += pp;
-            } else if (type.equals(metal)){
+            } else if (type.equals(metal)) {
                 poids += pm;
             }
         }
