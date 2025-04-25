@@ -10,8 +10,6 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import main.util.LocalDateAdapter;
 
 import static main.DepotDAO.*;
-import static main.outils.connexionSQL.requete;
-import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class Depot {
     private int identifiantDepot;
@@ -118,7 +116,7 @@ public class Depot {
     public static Depot creerDepot(Utilisateur util, List<Dechet> dechets){
         LocalDate dateProperty = LocalDate.now();
         LocalTime heure = LocalTime.now();
-        Depot depot = new Depot(0, dateProperty, heure, 0);
+        Depot depot = new Depot(0, dateProperty, heure, 0.0f, "verre", 0.5f);
         //Création dans la base de données
         creerDepotBDD(depot);
         return depot;
