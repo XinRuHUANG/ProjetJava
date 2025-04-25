@@ -68,9 +68,9 @@ public class Utilisateur {
     public void setPosseder(List<Depot> posseder) {this.posseder = posseder;}
 
     //Méthodes de classe
-    public static Utilisateur creerUtilisateur(String nom, String prenom, float pointsFidelite){
+    public static Utilisateur ajouterUtilisateur(String nom, String prenom, float pointsFidelite){
         Utilisateur utilisateur = new Utilisateur(0, nom, prenom, pointsFidelite);
-        creerUtilisateurBDD(utilisateur);
+        ajouterUtilisateurBDD(utilisateur);
         return utilisateur;
     }
 
