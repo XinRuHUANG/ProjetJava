@@ -15,7 +15,7 @@ public class UtilisateurDAO extends Utilisateur{
     }
 
     //Ajouter
-    public static void creerUtilisateurBDD(Utilisateur utilisateur) {
+    public static void ajouterUtilisateurBDD(Utilisateur utilisateur) {
         // Création de l'identifiant
         String requete = "SELECT MAX(identifiantUtilisateur) FROM Utilisateur";
         ArrayList<String> attributs = new ArrayList<>();
