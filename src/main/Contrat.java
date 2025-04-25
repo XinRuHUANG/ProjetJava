@@ -54,12 +54,23 @@ public class Contrat {
 
     // Méthodes de classe
     public static Contrat ajouterContrat(LocalDate dateDebut, LocalDate dateFin, String clauses, CentreDeTri commercer, Promotion promotion, Promotion commerce) {
+        /*Crée et ajoute un nouveau contrat à la base de données.
+         * @param dateDebut La date de début du contrat.
+         * @param dateFin La date de fin du contrat.
+         * @param clauses Les clauses du contrat sous forme de texte.
+         * @param commercer Le centre de tri lié au contrat.
+         * @param promotion La promotion proposée par le centre de tri.
+         * @param commerce La promotion proposée par le commerce.
+         * @return Le contrat nouvellement créé.
+         */
         Contrat contrat = new Contrat(0, dateDebut, dateFin, clauses, commercer, promotion, commerce);
         ajouterContratBDD(contrat);
         return contrat;
     }
 
     public void supprimerContrat() {
+        /*Supprime ce contrat de la base de données.
+         */
         supprimerContratBDD(this);
     }
 
