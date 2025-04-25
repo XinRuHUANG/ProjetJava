@@ -4,29 +4,35 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
-import static main.CentreDeTriDAO.actualiserCentreBDD;
-import static main.DechetDAO.ajouterDechetBDD;
+import javafx.beans.property.*;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import main.util.LocalDateAdapter;
+
 import static main.DepotDAO.*;
 import static main.outils.connexionSQL.requete;
-import static main.TypeDechetEnum.TypeDechet;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class Depot {
     private int identifiantDepot;
-    private static LocalDate date;
+    private final ObjectProperty<LocalDate> date = new SimpleObjectProperty<>();
     private LocalTime heure;
-    private float points;
+    private final FloatProperty points = new SimpleFloatProperty();
+    private final StringProperty type = new SimpleStringProperty();
+    private final FloatProperty poids = new SimpleFloatProperty();
 
     //modélisation des associations
     private Set<PoubelleIntelligente> jeter; //un dépot peut être répartie entre plusieurs poubelles (cf. tri)
     private Utilisateur posseder;
     private List<Dechet> contenir;
 
-    public Depot(int identifiantDepot, LocalDate date, LocalTime heure, float points) {
+    public Depot(int identifiantDepot, LocalDate date, LocalTime heure, float points, String type, float poids) {
         this.identifiantDepot = identifiantDepot;
-        this.date = date;
+        this.date.set(date);
         this.heure = heure;
-        this.points = points;
+        this.points.set(points);
+        this.type.set(type);
+        this.poids.set(poids);
     }
 
     public int getIdentifiantDepot() {
@@ -36,11 +42,17 @@ public class Depot {
         this.identifiantDepot = identifiantDepot;
     }
 
+    @XmlJavaTypeAdapter(LocalDateAdapter.class)
     public LocalDate getDate() {
-        return date;
+        return date.get();
     }
+
     public void setDate(LocalDate date) {
-        this.date = date;
+        this.date.set(date);
+    }
+
+    public ObjectProperty<LocalDate> dateProperty() {
+        return date;
     }
 
     public LocalTime getHeure() {
@@ -51,11 +63,36 @@ public class Depot {
     }
 
     public float getPoints() {
+        return points.get();
+    }
+
+    public void setPoints(float points) {
+        this.points.set(points);
+    }
+
+    public FloatProperty pointsProperty() {
         return points;
     }
-    public void setPoints(float points) {
-        this.points = points;
+
+    public String getType() {
+        return type.get();
     }
+
+    public void setType(String type) {
+        this.type.set(type);
+    }
+
+    public StringProperty typeProperty(){ return type; }
+
+    public float getPoids() {
+        return poids.get();
+    }
+
+    public void setPoids(float poids) {
+        this.poids.set(poids);
+    }
+
+    public FloatProperty poidsProperty(){ return poids; }
 
     public Set<PoubelleIntelligente> getJeter() {
         return jeter;
@@ -91,9 +128,9 @@ public class Depot {
     }
 
     public static Depot creerDepot(Utilisateur util, List<Dechet> dechets){
-        LocalDate Date = LocalDate.now();
+        LocalDate dateProperty = LocalDate.now();
         LocalTime heure = LocalTime.now();
-        Depot depot = new Depot(0, Date, heure, 0);
+        Depot depot = new Depot(0, dateProperty, heure, 0);
         //Création dans la base de données
         creerDepotBDD(depot);
         return depot;
