@@ -1,15 +1,13 @@
 package main;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
-import static main.CentreDeTriDAO.supprimerCentreBDD;
+import static main.ContratDAO.actualiserContratBDD;
 import static main.PoubelleIntelligenteDAO.*;
 import static main.TypeDechetEnum.*;
 import static main.TypeDechetEnum.TypeDechet.*;
-import static main.outils.connexionSQL.requete;
-import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class PoubelleIntelligente {
     private int identifiantPoubelle;
@@ -22,8 +20,8 @@ public class PoubelleIntelligente {
     private CentreDeTri gerer;
     private Set<Depot> jeter;
 
-    public PoubelleIntelligente(String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter) {
-        this.identifiantPoubelle = 0;
+    public PoubelleIntelligente(int identifiantPoubelle, String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter) {
+        this.identifiantPoubelle = identifiantPoubelle;
         this.emplacement = emplacement;
         this.capaciteMaximale = capaciteMaximale;
         this.type = type;
@@ -73,27 +71,53 @@ public class PoubelleIntelligente {
     public float getPoids() {return poids;}
     public void setPoids(float poids) {this.poids = poids;}
 
-
-    @Override
-    public String toString() {
-        return "PoubelleIntelligente{" +
-                "identifiantPoubelle=" + identifiantPoubelle +
-                ", emplacement='" + emplacement + '\'' +
-                ", capaciteMaximale=" + capaciteMaximale +
-                ", type=" + type +
-                ", gerer=" + gerer +
-                ", jeter=" + jeter +
-                '}';
-    }
-
     public static PoubelleIntelligente ajouterPoubelle(String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter) {
-        PoubelleIntelligente poubelle = new PoubelleIntelligente(emplacement, capaciteMaximale, type, poids, gerer, jeter);
+        PoubelleIntelligente poubelle = new PoubelleIntelligente(0,emplacement, capaciteMaximale, type, poids, gerer, jeter);
         ajouterPoubelleBDD(poubelle);
         return poubelle;
     }
 
     public void retirerPoubelle() {
         supprimerPoubelleBDD(this);
+    }
+
+    public void modifierPoubelle(Map<String, Object> modifications) {
+        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
+         * {ième attribut = ième valeur}*/
+        for (Map.Entry<String, Object> entry : modifications.entrySet()) {
+            String cle = entry.getKey();
+            Object obj = entry.getValue();
+            if (cle == "emplacement") {
+                String emplacement = (String) obj;
+                this.setEmplacement(emplacement);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
+            if (cle == "capaciteMaximale") {
+                float capaciteMaximale = (float) obj;
+                this.setCapaciteMaximale(capaciteMaximale);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
+            if (cle == "type") {
+                TypeDechet type = (TypeDechet) obj;
+                this.setType(type);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
+            if (cle == "poids") {
+                float poids = (float) obj;
+                this.setPoids(poids);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
+            if (cle == "gerer") {
+                CentreDeTri gerer = (CentreDeTri) obj;
+                this.setGerer(gerer);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
+            if (cle == "jeter") {
+                Set<Depot> jeter = (Set<Depot>) obj;
+                this.setJeter(jeter);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
+        }
     }
 
     //On va juste vider la poubelle "fictivement"
@@ -130,5 +154,28 @@ public class PoubelleIntelligente {
         return poids;
     }
 
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        PoubelleIntelligente poubelleIntelligente = (PoubelleIntelligente) obj;
+        return this.identifiantPoubelle == poubelleIntelligente.identifiantPoubelle
+                && this.emplacement == poubelleIntelligente.emplacement && this.capaciteMaximale == poubelleIntelligente.capaciteMaximale
+                && this.type == poubelleIntelligente.type && this.poids == poubelleIntelligente.poids &&
+                this.gerer.equals(poubelleIntelligente.gerer) && this.jeter.equals(poubelleIntelligente.jeter);
+    }
+
+    @Override
+    public String toString() {
+        return "PoubelleIntelligente{" +
+                "identifiantPoubelle=" + identifiantPoubelle +
+                ", emplacement='" + emplacement + '\'' +
+                ", capaciteMaximale=" + capaciteMaximale +
+                ", type=" + type +
+                ", poids=" + poids +
+                ", gerer=" + gerer +
+                ", jeter=" + jeter +
+                '}';
+    }
 }
 
