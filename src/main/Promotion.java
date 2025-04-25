@@ -65,41 +65,55 @@ public class Promotion {
         this.definir = definir;
     }
 
-    public static Promotion ajouterPromotion(float pourcentageRemise, float pointsRequis){
-        Promotion promotion = new Promotion(0,pourcentageRemise,pointsRequis);
+
+    public static Promotion ajouterPromotion(float pourcentageRemise, float pointsRequis) {
+        /*Crée une nouvelle promotion et l'ajoute à la base de données.
+         *
+         * @param pourcentageRemise Le pourcentage de remise accordé par la promotion.
+         * @param pointsRequis Le nombre de points requis pour bénéficier de la promotion.
+         * @return La promotion nouvellement créée.
+         */
+        Promotion promotion = new Promotion(0, pourcentageRemise, pointsRequis);
         ajouterPromotionBDD(promotion);
         return promotion;
     }
-    public void supprimerPromotion(){
+
+    public void supprimerPromotion() {
+        /* Supprime cette promotion de la base de données.
+         */
         supprimerPromotionBDD(this);
     }
-    public void modifierPromotion(Map<String, Object> modifications){
-        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
-         * {ième attribut = ième valeur}*/
-        for(Map.Entry<String, Object> entry: modifications.entrySet()) {
+
+
+    public void modifierPromotion(Map<String, Object> modifications) {
+        /*Modifie les attributs de la promotion en fonction de la map fournie.
+         * @param modifications Map contenant les attributs à modifier : peut inclure
+         *                      {"pourcentageRemise", "pointsRequis", "concerner", "definir", "utiliser"}.
+         */
+        for (Map.Entry<String, Object> entry : modifications.entrySet()) {
             String cle = entry.getKey();
             Object obj = entry.getValue();
-            if (cle=="pourcentageRemise"){
-                float  pourcentageRemise = (float) obj;
+            if (cle == "pourcentageRemise") {
+                float pourcentageRemise = (float) obj;
                 this.setPourcentageRemise(pourcentageRemise);
                 actualiserPromotionBDD(this, cle);
             }
-            if (cle=="pointsRequis"){
+            if (cle == "pointsRequis") {
                 float pointsRequis = (float) obj;
                 this.setPointsRequis(pointsRequis);
                 actualiserPromotionBDD(this, cle);
             }
-            if (cle=="concerner"){
+            if (cle == "concerner") {
                 CategorieDeProduits concerner = (CategorieDeProduits) obj;
                 this.setConcerner(concerner);
                 actualiserPromotionBDD(this, cle);
             }
-            if (cle=="definir"){
+            if (cle == "definir") {
                 Contrat definir = (Contrat) obj;
                 this.setDefinir(definir);
                 actualiserPromotionBDD(this, cle);
             }
-            if (cle=="utiliser"){
+            if (cle == "utiliser") {
                 Set<Utilisateur> posseder = (Set<Utilisateur>) obj;
                 this.setUtiliser(posseder);
                 actualiserPromotionBDD(this, cle);
