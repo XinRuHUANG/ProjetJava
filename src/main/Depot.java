@@ -12,9 +12,9 @@ import main.util.LocalDateAdapter;
 import static main.DepotDAO.*;
 
 public class Depot {
-    private int identifiantDepot;
+    private final IntegerProperty identifiantDepot = new SimpleIntegerProperty();
     private final ObjectProperty<LocalDate> date = new SimpleObjectProperty<>();
-    private LocalTime heure;
+    private final ObjectProperty<LocalTime> heure = new SimpleObjectProperty();
     private final FloatProperty points = new SimpleFloatProperty();
     private final StringProperty type = new SimpleStringProperty();
     private final FloatProperty poids = new SimpleFloatProperty();
@@ -25,40 +25,42 @@ public class Depot {
     private List<Dechet> contenir;
 
     public Depot(int identifiantDepot, LocalDate date, LocalTime heure, float points, String type, float poids) {
-        this.identifiantDepot = identifiantDepot;
+        this.identifiantDepot.set(identifiantDepot);
         this.date.set(date);
-        this.heure = heure;
+        this.heure.set(heure);
         this.points.set(points);
         this.type.set(type);
         this.poids.set(poids);
     }
 
+    //Getters et Setters
     public int getIdentifiantDepot() {
-        return identifiantDepot;
+        return identifiantDepot.get();
     }
     public void setIdentifiantDepot(int identifiantDepot) {
-        this.identifiantDepot = identifiantDepot;
+        this.identifiantDepot.set(identifiantDepot);
     }
+
+    public IntegerProperty idProperty(){ return identifiantDepot; }
 
     @XmlJavaTypeAdapter(LocalDateAdapter.class)
     public LocalDate getDate() {
         return date.get();
     }
-
     public void setDate(LocalDate date) {
         this.date.set(date);
     }
-
     public ObjectProperty<LocalDate> dateProperty() {
         return date;
     }
 
     public LocalTime getHeure() {
-        return heure;
+        return heure.get();
     }
     public void setHeure(LocalTime heure) {
-        this.heure = heure;
+        this.heure.set(heure);
     }
+    public ObjectProperty<LocalTime> heureProperty(){ return heure; }
 
     public float getPoints() {
         return points.get();
