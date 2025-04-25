@@ -1,12 +1,8 @@
 package main;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static main.DepotDAO.actualiserDepotBDD;
 import static main.PromotionDAO.*;
 
 public class Promotion {
@@ -112,11 +108,25 @@ public class Promotion {
     }
 
     @Override
-    public String toString(){
-        return "Promotion{"+
-                "idPromotion="+idPromotion+
-                "pourcentageRemise="+pourcentageRemise+
-                "pointsRequis="+pointsRequis+
-                "}";
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        Promotion promotion = (Promotion) obj;
+        return this.idPromotion == promotion.idPromotion
+                && this.pourcentageRemise == promotion.pourcentageRemise && this.pointsRequis == promotion.pointsRequis
+                && this.concerner.equals(promotion.concerner) && this.definir.equals(promotion.definir)
+                && this.utiliser.equals(promotion.utiliser);
+    }
+
+    @Override
+    public String toString() {
+        return "Promotion{" +
+                "idPromotion=" + idPromotion +
+                ", pourcentageRemise=" + pourcentageRemise +
+                ", pointsRequis=" + pointsRequis +
+                ", concerner=" + concerner +
+                ", definir=" + definir +
+                ", utiliser=" + utiliser +
+                '}';
     }
 }

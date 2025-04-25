@@ -68,9 +68,9 @@ public class Utilisateur {
     public void setPosseder(List<Depot> posseder) {this.posseder = posseder;}
 
     //Méthodes de classe
-    public static Utilisateur creerUtilisateur(String nom, String prenom, float pointsFidelite){
+    public static Utilisateur ajouterUtilisateur(String nom, String prenom, float pointsFidelite){
         Utilisateur utilisateur = new Utilisateur(0, nom, prenom, pointsFidelite);
-        creerUtilisateurBDD(utilisateur);
+        ajouterUtilisateurBDD(utilisateur);
         return utilisateur;
     }
 
@@ -78,7 +78,7 @@ public class Utilisateur {
         supprimerUtilisateurBDD(utilisateur);
     }
 
-    public void modifierUtilisateur(Utilisateur utilisateur, Map<String, Object> modifications){
+    public void modifierUtilisateur(Map<String, Object> modifications){
         /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
          * {ième attribut = ième valeur}*/
         for(Map.Entry<String, Object> entry: modifications.entrySet()) {
@@ -86,28 +86,28 @@ public class Utilisateur {
             Object obj = entry.getValue();
             if (cle=="nom"){
                 String nom = (String) obj;
-                utilisateur.setNom(nom);
-                actualiserUtilisateurBDD(utilisateur, cle);
+                this.setNom(nom);
+                actualiserUtilisateurBDD(this, cle);
             }
             if (cle=="prenom"){
                 String prenom = (String) obj;
-                utilisateur.setPrenom(prenom);
-                actualiserUtilisateurBDD(utilisateur, cle);
+                this.setPrenom(prenom);
+                actualiserUtilisateurBDD(this, cle);
             }
             if (cle=="pointsFidelite"){
                 float pointsFidelite = (float) obj;
-                utilisateur.setPointsFidelite(pointsFidelite);
-                actualiserUtilisateurBDD(utilisateur, cle);
+                this.setPointsFidelite(pointsFidelite);
+                actualiserUtilisateurBDD(this, cle);
             }
             if (cle=="posseder"){
                 List<Depot> posseder = (List<Depot>) obj;
-                utilisateur.setPosseder(posseder);
-                actualiserUtilisateurBDD(utilisateur, cle);
+                this.setPosseder(posseder);
+                actualiserUtilisateurBDD(this, cle);
             }
             if (cle=="utiliser"){
                 Set<Promotion> utiliser = (Set<Promotion>) obj;
-                utilisateur.setUtiliser(utiliser);
-                actualiserUtilisateurBDD(utilisateur, cle);
+                this.setUtiliser(utiliser);
+                actualiserUtilisateurBDD(this, cle);
             }
         }
     }
@@ -142,14 +142,27 @@ public class Utilisateur {
         return Historique;
     }
 
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        Utilisateur utilisateur = (Utilisateur) obj;
+        return this.idUtilisateur == utilisateur.idUtilisateur
+                && this.nom == utilisateur.nom && this.prenom == utilisateur.prenom
+                && this.pointsFidelite == utilisateur.pointsFidelite && this.posseder.equals(utilisateur.posseder)
+                && this.utiliser.equals(utilisateur.utiliser);
+    }
+
     @Override
     public String toString() {
         return "Utilisateur{" +
-                "identifiantUtilisateur=" + idUtilisateur +
+                "idUtilisateur=" + idUtilisateur +
                 ", nom='" + nom + '\'' +
                 ", prenom='" + prenom + '\'' +
                 ", pointsFidelite=" + pointsFidelite +
                 ", posseder=" + posseder +
-                ", utiliser=" + utiliser + '}';
+                ", utiliser=" + utiliser +
+                '}';
     }
 }

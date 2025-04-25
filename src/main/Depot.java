@@ -115,18 +115,6 @@ public class Depot {
         this.contenir = contenir;
     }
 
-    @Override
-    public String toString() {
-        return "Depot{" +
-                "identifiantDepot=" + identifiantDepot +
-                ", heure=" + heure +
-                ", points=" + points +
-                ", jeter=" + jeter +
-                ", posseder=" + posseder +
-                ", contenir=" + contenir +
-                '}';
-    }
-
     public static Depot creerDepot(Utilisateur util, List<Dechet> dechets){
         LocalDate dateProperty = LocalDate.now();
         LocalTime heure = LocalTime.now();
@@ -199,44 +187,29 @@ public class Depot {
     */
 
     public static boolean verifierNature(Dechet dechet, PoubelleIntelligente poubelle){
-        return dechet.getType().equals(poubelle.getType());
+        return dechet.getType() == poubelle.getType();
     }
 
-    public void viderDepot(List<PoubelleIntelligente> poubelles, List<Set<Integer>> indices_dechets){
-        /*Transfère des déchets du dépot vers la poubelle avec calcul des points en parallèle*/
-        List<Dechet> dechets = this.contenir; //Liste des déchets dans le dépôt courant
-        float points = 0;
-        int n = poubelles.size();
-        for (int k=0; k<n; k++){ //On parcourt la liste poubelles
-            PoubelleIntelligente poubelle = poubelles.get(k);
-            int identifiantPoubelle = poubelle.getIdentifiantPoubelle();
-            int identifiantDechet = 0;
-            String requete = "";
-            int m = indices_dechets.get(k).size();
-            for (int l=0; l<m; l++){ //On parcourt la liste d'indices concernés par la poubelle et donc indirectement les déchets concernés pas la poubelle
-                Dechet dechet = dechets.get(l);
-                if (verifierNature(dechet,poubelle)){
-                    points += 7;
-                } else {
-                    points -= 5;
-                }
-                identifiantDechet = dechet.getIdentifiantDechet();
-                requete = "INSERT INTO stocker(identifiantPoubelle, identifiantDechet) VALUES("+Integer.toString(identifiantPoubelle)+","+Integer.toString(identifiantDechet)+");";
-                requete(requete);
-            }
-        }
-        /*Ajout des points à l'utilisateur*/
-        //Récupération du nombre de points
-        int identifiantUtilisateur = posseder.getIdUtilisateur();
-        String requete = "SELECT pointsFidelite FROM Utilisateur WHERE identifiantUtilisateur = " + Integer.toString(identifiantUtilisateur)+";";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantUtilisateur");
-        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        float pointsFidelite = Integer.parseInt(infos.getFirst().get("identifiantUtilisateur"));
-        //Calcul du nombre de points
-        pointsFidelite += points;
-        //Changement du nombre de points
-        requete = "UPDATE Utilisateur SET pointsFidelite = " + Float.toString(pointsFidelite)+ " WHERE identifiantUtilisateur = " + Integer.toString(identifiantUtilisateur) + ";";
-        requete(requete);
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        Depot depot = (Depot) obj;
+        return this.identifiantDepot == depot.identifiantDepot &&
+                this.date.equals(depot.date) && this.heure.equals(depot.heure)
+                && this.points == depot.points && this.jeter.equals(depot.jeter)
+                && this.posseder.equals(depot.posseder) && this.contenir.equals(depot.contenir);
+    }
+
+    @Override
+    public String toString() {
+        return "Depot{" +
+                "identifiantDepot=" + identifiantDepot +
+                ", heure=" + heure +
+                ", points=" + points +
+                ", jeter=" + jeter +
+                ", posseder=" + posseder +
+                ", contenir=" + contenir +
+                '}';
     }
 }

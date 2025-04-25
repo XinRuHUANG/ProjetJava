@@ -1,9 +1,12 @@
 package main;
 
 import java.time.LocalDate;
-import static main.ContratDAO.ajouterContratBDD;
-import static main.ContratDAO.supprimerContratBDD;
-import static main.ContratDAO.modifierContratBDD;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static main.CommerceDAO.actualiserCommerceBDD;
+import static main.ContratDAO.*;
 
 public class Contrat {
 
@@ -12,15 +15,19 @@ public class Contrat {
     private LocalDate dateDebut;
     private LocalDate dateFin;
     private String clauses;
-    private CentreDeTri centre;
+    //Modélisation des associations
+    private CentreDeTri commercer;
+    private Commerce commerce;
+    private Promotion definir;
 
     // Constructeur
-    public Contrat(int idContrat, LocalDate dateDebut, LocalDate dateFin, String clauses, CentreDeTri centre) {
+    public Contrat(int idContrat, LocalDate dateDebut, LocalDate dateFin, String clauses, CentreDeTri commercer, Promotion definir, Promotion commerce) {
         this.idContrat = idContrat;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.clauses = clauses;
-        this.centre = centre;
+        this.commercer = commercer;
+        this.definir = definir;
     }
 
     // Getters et Setters
@@ -36,33 +43,88 @@ public class Contrat {
     public String getClauses() { return clauses; }
     public void setClauses(String clauses) { this.clauses = clauses; }
 
-    public CentreDeTri getCentre() { return centre; }
-    public void setCentre(CentreDeTri centre) { this.centre = centre; }
+    public CentreDeTri getCommercer() { return commercer; }
+    public void setCommercer(CentreDeTri commercer) { this.commercer = commercer; }
+
+    public Promotion getDefinir() {return definir;}
+    public void setDefinir(Promotion definir) {this.definir = definir;}
+
+    public Commerce getCommerce() {return commerce;}
+    public void setCommerce(Commerce commerce) {this.commerce = commerce;}
 
     // Méthodes de classe
-    public static Contrat definirContrat(LocalDate dateDebut, LocalDate dateFin, String clauses, CentreDeTri centre) {
-        Contrat contrat = new Contrat(0, dateDebut, dateFin, clauses, centre);
+    public static Contrat ajouterContrat(LocalDate dateDebut, LocalDate dateFin, String clauses, CentreDeTri commercer, Promotion promotion, Promotion commerce) {
+        Contrat contrat = new Contrat(0, dateDebut, dateFin, clauses, commercer, promotion, commerce);
         ajouterContratBDD(contrat);
         return contrat;
     }
 
-    public static void supprimerContrat(Contrat contrat) {
-        supprimerContratBDD(contrat);
+    public void supprimerContrat() {
+        supprimerContratBDD(this);
     }
 
-    public static Contrat modifierContrat(Contrat contrat) {
-        modifierContratBDD(contrat);
-        return contrat;
+    public void modifierContrat(Map<String, Object> modifications) {
+        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
+         * {ième attribut = ième valeur}*/
+        for (Map.Entry<String, Object> entry : modifications.entrySet()) {
+            String cle = entry.getKey();
+            Object obj = entry.getValue();
+            if (cle == "dateDebut") {
+                LocalDate date = (LocalDate) obj;
+                this.setDateDebut(date);
+                actualiserContratBDD(this, cle);
+            }
+            if (cle == "dateFin") {
+                LocalDate date = (LocalDate) obj;
+                this.setDateFin(date);
+                actualiserContratBDD(this, cle);
+            }
+            if (cle == "clauses") {
+                String clauses = (String) obj;
+                this.setClauses(clauses);
+                actualiserContratBDD(this, cle);
+            }
+            if (cle == "commercer") {
+                assert modifications.containsKey("commerce");
+                CentreDeTri commercer = (CentreDeTri) obj;
+                this.setCommercer(commercer);
+                actualiserContratBDD(this, cle);
+            }
+            if (cle == "commerce") {
+                assert modifications.containsKey("commercer");
+                Commerce commerce = (Commerce) obj;
+                this.setCommerce(commerce);
+                actualiserContratBDD(this, cle);
+            }
+            if (cle == "definir") {
+                Promotion definir = (Promotion) obj;
+                this.setDefinir(definir);
+                actualiserContratBDD(this, cle);
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        Contrat contrat = (Contrat) obj;
+        return this.idContrat == contrat.idContrat &&
+                this.dateDebut.equals(contrat.dateDebut) && this.dateFin.equals(contrat.dateFin)
+                && this.clauses == contrat.clauses && this.commercer.equals(contrat.commercer)
+                && this.commerce.equals(contrat.commerce)  && this.definir.equals(contrat.definir);
     }
 
     @Override
     public String toString() {
         return "Contrat{" +
-                "id=" + idContrat +
+                "idContrat=" + idContrat +
                 ", dateDebut=" + dateDebut +
                 ", dateFin=" + dateFin +
                 ", clauses='" + clauses + '\'' +
-                ", centre=" + centre +
+                ", commercer=" + commercer +
+                ", commerce=" + commerce +
+                ", definir=" + definir +
                 '}';
     }
 }

@@ -1,53 +1,93 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static main.outils.connexionSQL.requete;
-import static main.outils.connexionSQL.requeteAvecAffichage;
+import static main.CommerceDAO.*;
 
 public class Commerce {
     private int identifiantCommerce;
     private String nom;
     //modélisation des associations
-    private Set<CentreDeTri> commercer;
+    private List<CentreDeTri> commercer;
+    private List<Contrat> contrats;
     private Set<CategorieDeProduits> proposer;
 
-    public int getIdentifiantCommerce() {
-        return identifiantCommerce;
-    }
+    public int getIdentifiantCommerce() {return identifiantCommerce;}
+    public void setIdentifiantCommerce(int identifiantCommerce) {this.identifiantCommerce = identifiantCommerce;}
 
-    public void setIdentifiantCommerce(int identifiantCommerce) {
+    public String getNom() {return nom;}
+    public void setNom(String nom) {this.nom = nom;}
+
+    public List<CentreDeTri> getCommercer() {return commercer;}
+    public void setCommercer(List<CentreDeTri> commercer) {this.commercer = commercer;}
+
+    public Set<CategorieDeProduits> getProposer() {return proposer;}
+    public void setProposer(Set<CategorieDeProduits> proposer) {this.proposer = proposer;}
+
+    public List<Contrat> getContrat() {return contrats;}
+    public void setContrat(List<Contrat> contrat) {this.contrats = contrat;}
+
+    public static void definirContrat(){}
+    public static void listerProduitsPromo(){}
+
+    public Commerce(int identifiantCommerce, String nom, List<CentreDeTri> commercer, List<Contrat> contrats, Set<CategorieDeProduits> proposer) {
         this.identifiantCommerce = identifiantCommerce;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
         this.nom = nom;
-    }
-
-    public Set<CentreDeTri> getCommercer() {
-        return commercer;
-    }
-
-    public void setCommercer(Set<CentreDeTri> commercer) {
         this.commercer = commercer;
-    }
-
-    public Set<CategorieDeProduits> getProposer() {
-        return proposer;
-    }
-
-    public void setProposer(Set<CategorieDeProduits> proposer) {
+        this.contrats = contrats;
         this.proposer = proposer;
     }
 
+    public static Commerce ajouterCommerce(String nom, List<CentreDeTri> commercer, List<Contrat> contrats, Set<CategorieDeProduits> proposer){
+        Commerce commerce = new Commerce(0,nom, commercer, contrats, proposer);
+        ajouterCommerceBDD(commerce);
+        return commerce;
+    }
 
+    public void supprimerCommerce(){
+        supprimerCommerceBDD(this);
+    }
+
+    public void modifierCommerce(Map<String, Object> modifications){
+        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
+         * {ième attribut = ième valeur}*/
+        for(Map.Entry<String, Object> entry: modifications.entrySet()) {
+            String cle = entry.getKey();
+            Object obj = entry.getValue();
+            if (cle=="nom"){
+                String nom = (String) obj;
+                this.setNom(nom);
+                actualiserCommerceBDD(this, cle);
+            }
+            if (cle=="commercer"){
+                assert modifications.containsKey("contrats");
+                List<CentreDeTri> commercer = (List<CentreDeTri>) obj;
+                this.setCommercer(commercer);
+                actualiserCommerceBDD(this, cle);
+            }
+            if (cle=="proposer"){
+                Set<CategorieDeProduits> proposer = (Set<CategorieDeProduits>) obj;
+                this.setProposer(proposer);
+                actualiserCommerceBDD(this, cle);
+            }
+            if (cle=="contrats"){
+                assert modifications.containsKey("commercer");
+                List<Contrat> contrats = (List<Contrat>) obj;
+                this.setContrat(contrats);
+                actualiserCommerceBDD(this, cle);
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        Commerce commerce = (Commerce) obj;
+        return this.identifiantCommerce == commerce.identifiantCommerce &&
+                this.nom == commerce.nom && this.commercer.equals(commerce.commercer)
+                && this.proposer.equals(commerce.proposer) && this.contrats.equals(commerce.contrats);
+    }
 
     @Override
     public String toString() {
@@ -55,35 +95,8 @@ public class Commerce {
                 "identifiantCommerce=" + identifiantCommerce +
                 ", nom='" + nom + '\'' +
                 ", commercer=" + commercer +
+                ", contrats=" + contrats +
                 ", proposer=" + proposer +
                 '}';
     }
-
-    public static void definirContrat(){}
-    public static void listerProduitsPromo(){}
-
-    public Commerce(int identifiantCommerce, String nom) {
-        this.identifiantCommerce = identifiantCommerce;
-        this.nom = nom;
-    }
-
-    public static Commerce ajouterCommerce(String nom){
-        String requete = "SELECT MAX(identifiantCommerce) FROM Commerce;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantCommerce");
-        List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantCommerce")) + 1;
-
-        Commerce commerce = new Commerce(id, nom);
-        //Création dans la base de données
-        requete = "INSERT INTO Commerce(identifiantCommerce, nom) VALUES (" + Integer.toString(id) + "," + nom + ");";
-        requete(requete);
-        return commerce;
-    }
-
-    public void retirerCommerce(){
-        int identifiantCommerce = this.identifiantCommerce;
-        String requete = "DELETE FROM Commerce WHERE identifiant = " + Integer.toString(identifiantCommerce) + ";";
-    }
-
 }
