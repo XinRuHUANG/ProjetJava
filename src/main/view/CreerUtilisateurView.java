@@ -1,3 +1,5 @@
+package main;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -12,6 +14,7 @@ public class CreerUtilisateurView extends Application {
     @Override
     public void start(Stage primaryStage) {
         Label titre = new Label("Créer un compte utilisateur");
+        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         Label prenomLabel = new Label("Prénom :");
         TextField prenomField = new TextField();
@@ -23,24 +26,34 @@ public class CreerUtilisateurView extends Application {
 
         Button creerBtn = new Button("Créer le compte");
         creerBtn.setOnAction(e -> {
-            String nom = nomField.getText();
             String prenom = prenomField.getText();
+            String nom = nomField.getText();
 
-            if (nom.isBlank() || prenom.isBlank()) {
+            if (prenom.isBlank() || nom.isBlank()) {
                 confirmation.setText("Veuillez remplir tous les champs.");
             } else {
-                confirmation.setText("✔ Compte créé pour " + prenom + " " + nom);
-                prenomField.clear();
-                nomField.clear();
+                try {
+                    Utilisateur utilisateur = new Utilisateur(0, nom, prenom, 0.0f);
+                    UtilisateurDAO.ajouterUtilisateur(utilisateur);
+                    confirmation.setText("✔ Compte créé pour " + prenom + " " + nom);
+                    prenomField.clear();
+                    nomField.clear();
+                } catch (Exception ex) {
+                    confirmation.setText("❌ Erreur : " + ex.getMessage());
+                }
             }
         });
 
-        VBox root = new VBox(10, titre, prenomLabel, prenomField, nomLabel, nomField, creerBtn, confirmation);
-        root.setPadding(new Insets(20));
+        Button retourBtn = new Button("Retour au menu");
+        retourBtn.setOnAction(e -> primaryStage.close());
 
-        Scene scene = new Scene(root, 400, 300);
-        primaryStage.setTitle("Création utilisateur");
+        VBox root = new VBox(15, titre, prenomLabel, prenomField, nomLabel, nomField, creerBtn, confirmation, retourBtn);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-alignment: center;");
+
+        Scene scene = new Scene(root, 400, 400);
         primaryStage.setScene(scene);
+        primaryStage.setTitle("Création d'un utilisateur");
         primaryStage.show();
     }
 
