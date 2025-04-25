@@ -68,43 +68,59 @@ public class Utilisateur {
     public void setPosseder(List<Depot> posseder) {this.posseder = posseder;}
 
     //Méthodes de classe
-    public static Utilisateur ajouterUtilisateur(String nom, String prenom, float pointsFidelite){
+
+    public static Utilisateur ajouterUtilisateur(String nom, String prenom, float pointsFidelite) {
+        /* Crée un nouvel utilisateur et l'ajoute à la base de données.
+         *
+         * @param nom Le nom de l'utilisateur.
+         * @param prenom Le prénom de l'utilisateur.
+         * @param pointsFidelite Le nombre de points de fidélité de l'utilisateur.
+         * @return L'utilisateur nouvellement créé.
+         */
         Utilisateur utilisateur = new Utilisateur(0, nom, prenom, pointsFidelite);
         ajouterUtilisateurBDD(utilisateur);
         return utilisateur;
     }
 
-    public void supprimerUtilisateur(Utilisateur utilisateur){
+
+    public void supprimerUtilisateur(Utilisateur utilisateur) {
+        /*Supprime un utilisateur de la base de données.
+         *
+         * @param utilisateur L'utilisateur à supprimer.
+         */
         supprimerUtilisateurBDD(utilisateur);
     }
 
-    public void modifierUtilisateur(Map<String, Object> modifications){
-        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
-         * {ième attribut = ième valeur}*/
-        for(Map.Entry<String, Object> entry: modifications.entrySet()) {
+
+    public void modifierUtilisateur(Map<String, Object> modifications) {
+        /*Modifie les attributs d'un utilisateur en fonction des modifications spécifiées dans la map.
+         *
+         * @param modifications Map contenant les attributs à modifier.
+         */
+        for (Map.Entry<String, Object> entry : modifications.entrySet()) {
             String cle = entry.getKey();
             Object obj = entry.getValue();
-            if (cle=="nom"){
+            if (cle == "nom") {
                 String nom = (String) obj;
                 this.setNom(nom);
                 actualiserUtilisateurBDD(this, cle);
             }
-            if (cle=="prenom"){
+            if (cle == "prenom") {
                 String prenom = (String) obj;
                 this.setPrenom(prenom);
                 actualiserUtilisateurBDD(this, cle);
             }
-            if (cle=="pointsFidelite"){
+            if (cle == "pointsFidelite") {
                 float pointsFidelite = (float) obj;
                 this.setPointsFidelite(pointsFidelite);
                 actualiserUtilisateurBDD(this, cle);
             }
-            if (cle=="posseder"){
+            if (cle == "posseder") {
                 List<Depot> posseder = (List<Depot>) obj;
                 this.setPosseder(posseder);
                 actualiserUtilisateurBDD(this, cle);
             }
-            if (cle=="utiliser"){
+            if (cle == "utiliser") {
                 Set<Promotion> utiliser = (Set<Promotion>) obj;
                 this.setUtiliser(utiliser);
                 actualiserUtilisateurBDD(this, cle);
@@ -112,11 +128,17 @@ public class Utilisateur {
         }
     }
 
-    public boolean utiliserPoints(Utilisateur utilisateur, Promotion promotion){
-        /*Renvoie vrai si la promotion est utilisable et l'utilise le cas échéant sinon renvoie faux ! */
-        if (utilisateur.getPointsFidelite() > promotion.getPointsRequis()){
+
+    public boolean utiliserPoints(Utilisateur utilisateur, Promotion promotion) {
+        /*Permet à un utilisateur d'utiliser ses points de fidélité pour une promotion, si les conditions sont remplies.
+         *
+         * @param utilisateur L'utilisateur qui souhaite utiliser ses points.
+         * @param promotion La promotion que l'utilisateur veut utiliser.
+         * @return true si la promotion est utilisable et que les points ont été retirés, sinon false.
+         */
+        if (utilisateur.getPointsFidelite() > promotion.getPointsRequis()) {
             float points = utilisateur.getPointsFidelite();
-            utilisateur.setPointsFidelite(points - promotion.getPointsRequis()); //on considère que l'utilisateur a reçu le produit de la promotion et on retire les points
+            utilisateur.setPointsFidelite(points - promotion.getPointsRequis());
             actualiserUtilisateurBDD(utilisateur, "pointsFidelite");
             return true;
         } else {
@@ -124,19 +146,25 @@ public class Utilisateur {
         }
     }
 
-    public String consulterHistorique(Utilisateur utilisateur){
+
+    public String consulterHistorique(Utilisateur utilisateur) {
+        /*Consulte l'historique des dépôts effectués par l'utilisateur, triés par date et heure.
+         *
+         * @param utilisateur L'utilisateur dont on veut consulter l'historique.
+         * @return Une chaîne de caractères représentant l'historique des dépôts de l'utilisateur.
+         */
         String Historique = "Voici l'historique de l'utilisateur d'identifiant " + utilisateur.getIdUtilisateur() + ":\n";
         List<Depot> depots = utilisateur.getPosseder();
         depots.sort(Comparator
                 .comparing(Depot::getDate).reversed()
                 .thenComparing(Depot::getHeure).reversed());
         int n = depots.size();
-        for(int k = 0; k < n; k++){
+        for (int k = 0; k < n; k++) {
             List<Dechet> Dechets = depots.get(k).getContenir();
-            Historique.concat("Dépôt n°"+ depots.get(k).getIdentifiantDepot() + " qui contient: \n");
+            Historique += "Dépôt n°" + depots.get(k).getIdentifiantDepot() + " qui contient: \n";
             int m = Dechets.size();
-            for (int l=0; l < m; l++){
-                Historique.concat("  - Déchet n°"+ Dechets.get(l).getIdentifiantDechet() + " de type " + Dechets.get(l).getType());
+            for (int l = 0; l < m; l++) {
+                Historique += "  - Déchet n°" + Dechets.get(l).getIdentifiantDechet() + " de type " + Dechets.get(l).getType() + "\n";
             }
         }
         return Historique;
