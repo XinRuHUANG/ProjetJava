@@ -1,12 +1,10 @@
 package main;
 
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import static main.CentreDeTriDAO.actualiserCentreBDD;
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
@@ -50,7 +48,11 @@ public class UtilisateurDAO extends Utilisateur{
     // Supprimer un utilisateur
     public static void supprimerUtilisateurBDD(Utilisateur utilisateur) {
         int id = utilisateur.getIdUtilisateur();
-        String requete = "DELETE FROM Promotion WHERE idPromotion = " + id + ";";
+        String requete = "DELETE FROM utiliser WHERE identifiantUtilisateur = " + id + ";";
+        requete(requete);
+        requete = "DELETE FROM posseder WHERE identifiantUtilisateur = " + id + ";";
+        requete(requete);
+        requete = "DELETE FROM Utilisateur WHERE identifiantUtilisateur = " + id + ";";
         requete(requete);
     }
 
