@@ -29,6 +29,11 @@ public class PoubelleIntelligenteDAO {
             requete = "INSERT INTO jeter(identifiantDepot, identifiantPoubelleIntelligente) VALUES (" + depot.getIdentifiantDepot() + "," + poubelleIntelligente.getIdentifiantPoubelle() + ");";
             requete(requete);
         }
+        Set<Dechet> stocker = poubelleIntelligente.getStocker();
+        for (Dechet dechet : stocker){
+            requete = "INSERT INTO stocker(identifiantDechet, identifiantPoubelleIntelligente) VALUES (" + dechet.getIdentifiantDechet() + "," + poubelleIntelligente.getIdentifiantPoubelle() + ");";
+            requete(requete);
+        }
     }
 
     public static void supprimerPoubelleBDD(PoubelleIntelligente poubelleIntelligente){
@@ -36,6 +41,8 @@ public class PoubelleIntelligenteDAO {
         String requete = "DELETE FROM gerer WHERE identifiantPoubelleIntelligente = " + poubelleIntelligente.getIdentifiantPoubelle() + ";";
         requete(requete);
         requete = "DELETE FROM jeter WHERE identifiantPoubelleIntelligente =" + poubelleIntelligente.getIdentifiantPoubelle() + ";";
+        requete(requete);
+        requete = "DELETE FROM stocker WHERE identifiantPoubelleIntelligente =" + poubelleIntelligente.getIdentifiantPoubelle() + ";";
         requete(requete);
         requete = "DELETE FROM PoubelleIntelligente WHERE identifiantPoubelleIntelligente = " + Integer.toString(id) + ";";
         requete(requete);
@@ -81,11 +88,23 @@ public class PoubelleIntelligenteDAO {
                 requete(requete);
             }
         }
+        if (instruction == "stocker") {
+            requete = "DELETE FROM stocker WHERE identifiantPoubelleIntelligente = " + id + ";";
+            requete(requete);
+            Set<Dechet> dechets = poubelleIntelligente.getStocker();
+            for(Dechet dechet : dechets){
+                requete = "INSERT INTO gerer(identifiantPoubelleIntelligente, identifiantDechet) VALUES("
+                        + id + "," + dechet.getIdentifiantDechet() + ");";
+                requete(requete);
+            }
+        }
     }
 
     public static void collecterDechetsBDD(PoubelleIntelligente poubelleIntelligente){
         int id = poubelleIntelligente.getIdentifiantPoubelle();
         String requete = "UPDATE PoubelleIntelligente SET poids = " + 0 + " WHERE identifiantPoubelleIntelligente = " + id + ";";
+        requete(requete);
+        requete = "DELETE FROM stocker WHERE identifiantPoubelleIntelligente = " + id + ";";
         requete(requete);
     }
 
