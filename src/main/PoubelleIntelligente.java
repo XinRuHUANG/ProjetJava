@@ -1,10 +1,8 @@
 package main;
 
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
-import static main.ContratDAO.actualiserContratBDD;
 import static main.PoubelleIntelligenteDAO.*;
 import static main.TypeDechetEnum.*;
 import static main.TypeDechetEnum.TypeDechet.*;
@@ -19,8 +17,9 @@ public class PoubelleIntelligente {
     //modélisation des associations
     private CentreDeTri gerer;
     private Set<Depot> jeter;
+    private Set<Dechet> stocker;
 
-    public PoubelleIntelligente(int identifiantPoubelle, String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter) {
+    public PoubelleIntelligente(int identifiantPoubelle, String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter, Set<Dechet> stocker) {
         this.identifiantPoubelle = identifiantPoubelle;
         this.emplacement = emplacement;
         this.capaciteMaximale = capaciteMaximale;
@@ -28,6 +27,7 @@ public class PoubelleIntelligente {
         this.poids = poids;
         this.gerer = gerer;
         this.jeter = jeter;
+        this.stocker = stocker;
     }
 
     public int getIdentifiantPoubelle() {
@@ -71,8 +71,12 @@ public class PoubelleIntelligente {
     public float getPoids() {return poids;}
     public void setPoids(float poids) {this.poids = poids;}
 
-    public static PoubelleIntelligente ajouterPoubelle(String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter) {
-        PoubelleIntelligente poubelle = new PoubelleIntelligente(0,emplacement, capaciteMaximale, type, poids, gerer, jeter);
+    public Set<Dechet> getStocker() {return stocker;}
+
+    public void setStocker(Set<Dechet> stocker) {this.stocker = stocker;}
+
+    public static PoubelleIntelligente ajouterPoubelle(String emplacement, float capaciteMaximale, TypeDechet type, float poids, CentreDeTri gerer, Set<Depot> jeter, Set<Dechet> stocker) {
+        PoubelleIntelligente poubelle = new PoubelleIntelligente(0,emplacement, capaciteMaximale, type, poids, gerer, jeter, stocker);
         ajouterPoubelleBDD(poubelle);
         return poubelle;
     }
@@ -117,6 +121,11 @@ public class PoubelleIntelligente {
                 this.setJeter(jeter);
                 actualiserPoubelleIntelligenteBDD(this, cle);
             }
+            if (cle == "stocker") {
+                Set<Dechet> stocker = (Set<Dechet>) obj;
+                this.setStocker(stocker);
+                actualiserPoubelleIntelligenteBDD(this, cle);
+            }
         }
     }
 
@@ -124,6 +133,7 @@ public class PoubelleIntelligente {
     public void collecterDechets() {
         //vidage de la poubelle côté JAVA
         this.poids = 0;
+        this.stocker.clear();
         //vidage de la poubelle côté SQL
         collecterDechetsBDD(this);
     }
