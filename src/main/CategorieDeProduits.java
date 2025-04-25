@@ -44,33 +44,46 @@ public class CategorieDeProduits {
         this.proposer = proposer;
     }
 
-    public static CategorieDeProduits creerCategorieDeProduits(String nom, Set<Promotion> concerner, Set<Commerce> proposer){
-        CategorieDeProduits categorie = new CategorieDeProduits(0,nom,concerner,proposer);
+    public static CategorieDeProduits creerCategorieDeProduits(String nom, Set<Promotion> concerner, Set<Commerce> proposer) {
+        /* Crée une nouvelle catégorie de produits et l'ajoute à la base de données.
+         *
+         * @param nom Le nom de la catégorie de produits.
+         * @param concerner Les promotions associées à la catégorie de produits.
+         * @param proposer Les commerces qui proposent cette catégorie de produits.
+         * @return La catégorie de produits nouvellement créée.
+         */
+        CategorieDeProduits categorie = new CategorieDeProduits(0, nom, concerner, proposer);
         ajouterCategorieDeProduitsBDD(categorie);
         return categorie;
     }
 
-    public void supprimerCategorieDeProduits(){
+
+    public void supprimerCategorieDeProduits() {
+        /*Supprime la catégorie de produits de la base de données.
+         */
         supprimerCategorieDeProduitsBDD(this);
     }
 
-    public void modifierCategorieDeProduitsBDD(Map<String, Object> modifications){
-        /*Fonction pour modifier le depot, une map "modifications" permet d'informer le programme des attributs qu'on veut modifier, on suppose que cette map est de la forme
-         * {ième attribut = ième valeur}*/
-        for(Map.Entry<String, Object> entry: modifications.entrySet()) {
+
+    public void modifierCategorieDeProduitsBDD(Map<String, Object> modifications) {
+        /*Modifie les attributs de la catégorie de produits en fonction des modifications spécifiées dans la map.
+         *
+         * @param modifications Map contenant les attributs à modifier.
+         */
+        for (Map.Entry<String, Object> entry : modifications.entrySet()) {
             String cle = entry.getKey();
             Object obj = entry.getValue();
-            if (cle=="nom"){
+            if (cle.equals("nom")) {
                 String nom = (String) obj;
                 this.setNom(nom);
                 actualiserCategorieDeProduitsBDD(this, cle);
             }
-            if (cle=="concerner"){
+            if (cle.equals("concerner")) {
                 Set<Promotion> concerner = (Set<Promotion>) obj;
                 this.setConcerner(concerner);
                 actualiserCategorieDeProduitsBDD(this, cle);
             }
-            if (cle=="proposer"){
+            if (cle.equals("proposer")) {
                 Set<Commerce> proposer = (Set<Commerce>) obj;
                 this.setProposer(proposer);
                 actualiserCategorieDeProduitsBDD(this, cle);
