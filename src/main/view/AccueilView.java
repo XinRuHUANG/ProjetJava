@@ -8,10 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class AccueilView extends Application {
+import static javafx.application.Application.launch;
 
-    @Override
-    public void start(Stage primaryStage) {
+public class AccueilView {
+    public void show(Stage stage) {
         Label titre = new Label("Bienvenue sur TriPlus");
         titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
@@ -30,6 +30,7 @@ public class AccueilView extends Application {
         root.setStyle("-fx-alignment: center;");
 
         Scene scene = new Scene(root, 400, 300);
+        Stage primaryStage = new Stage();
         primaryStage.setScene(scene);
         primaryStage.setTitle("Menu principal");
         primaryStage.show();

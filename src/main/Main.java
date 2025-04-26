@@ -4,16 +4,23 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import main.controller.HistoriqueDepotController;
 import main.controller.RootLayoutController;
+
+import main.view.AccueilView;
+import main.view.CreerUtilisateurView;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +40,34 @@ public class Main extends Application {  // Étendre Application
 
     @Override
     public void start(Stage primaryStage) {
-        Label label = new Label("Hello JavaFX!");
-        Scene scene = new Scene(new StackPane(label), 300, 200);
+        this.primaryStage = primaryStage;
+        this.primaryStage.setTitle("TriPlus - Gestion des dépôts");
+
+        // Initialisation des données exemple (optionnel)
+        initSampleData();
+
+        // Afficher l'écran d'accueil
+        showAccueilView();
+    }
+
+    // Affiche la vue d'accueil (remplace le StackPane initial)
+    public void showAccueilView() {
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(30));
+        root.setStyle("-fx-alignment: center;");
+
+        Label titre = new Label("Bienvenue sur TriPlus");
+        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Button creerUtilisateurBtn = new Button("Créer un compte utilisateur");
+        creerUtilisateurBtn.setOnAction(e -> new CreerUtilisateurView().start(new Stage()));
+
+        Button gestionDepotsBtn = new Button("Gérer les dépôts");
+        gestionDepotsBtn.setOnAction(e -> showHistoriqueDepotView());
+
+        root.getChildren().addAll(titre, creerUtilisateurBtn, gestionDepotsBtn);
+
+        Scene scene = new Scene(root, 400, 300);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
