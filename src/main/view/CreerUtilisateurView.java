@@ -1,4 +1,4 @@
-package main;
+package main.view;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import main.Utilisateur;
+import main.UtilisateurDAO;
 
 public class CreerUtilisateurView extends Application {
 
@@ -34,7 +36,7 @@ public class CreerUtilisateurView extends Application {
             } else {
                 try {
                     Utilisateur utilisateur = new Utilisateur(0, nom, prenom, 0.0f);
-                    UtilisateurDAO.ajouterUtilisateur(utilisateur);
+                    UtilisateurDAO.ajouterUtilisateurBDD(utilisateur);
                     confirmation.setText("✔ Compte créé pour " + prenom + " " + nom);
                     prenomField.clear();
                     nomField.clear();

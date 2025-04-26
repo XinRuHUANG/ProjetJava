@@ -15,7 +15,7 @@ public class PoubelleIntelligenteDAO {
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantPoubelleIntelligente");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantPoubelleIntelligente")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantPoubelleIntelligente")) + 1;
 
         requete = "INSERT INTO PoubelleIntelligente(identifiant, type, emplacement, capaciteMaximale) VALUES (" + Integer.toString(id) + ","
                 + poubelleIntelligente.getType().toString() + "," + poubelleIntelligente.getEmplacement() + ","

@@ -21,7 +21,7 @@ public class PromotionDAO extends Promotion{
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantPromotion");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantPromotion")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantPromotion")) + 1;
 
         //Récupération des infos
         promotion.setIdPromotion(id);

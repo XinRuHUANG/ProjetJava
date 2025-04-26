@@ -18,7 +18,7 @@ public class ContratDAO {
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantContrat");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantContrat")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantContrat")) + 1;
 
         // Récupérer les infos du contrat
         contrat.setIdContrat(id);

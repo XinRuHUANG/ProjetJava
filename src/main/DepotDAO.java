@@ -14,7 +14,7 @@ public class DepotDAO {
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantDepot");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete,attributs);
-        int identifiantDepot = Integer.parseInt(infos.getFirst().get("identifiantDepot")) + 1;
+        int identifiantDepot = Integer.parseInt(infos.get(0).get("identifiantDepot")) + 1;
 
         requete = "INSERT INTO Depot(identifiantDepot, date, heure, points) VALUES ("+Integer.toString(identifiantDepot)+","
                 +depot.getDate().toString()+","+depot.getHeure().toString()+ "," + depot.getPoints() + ");";

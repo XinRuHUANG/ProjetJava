@@ -21,7 +21,7 @@ public class UtilisateurDAO extends Utilisateur{
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantUtilisateur");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantUtilisateur")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantUtilisateur")) + 1;
 
         //Récupération des infos
         utilisateur.setIdUtilisateur(id);

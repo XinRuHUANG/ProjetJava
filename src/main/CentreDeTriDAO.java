@@ -21,7 +21,7 @@ public class CentreDeTriDAO extends CentreDeTri{
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantCentreDeTri");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantCentreDeTri")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantCentreDeTri")) + 1;
 
         //Récupération des infos
         centreDeTri.setIdCentreDeTri(id);

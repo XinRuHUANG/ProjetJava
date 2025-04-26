@@ -20,7 +20,7 @@ public class CommerceDAO extends Commerce {
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantCommerce");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantCommerce")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantCommerce")) + 1;
 
         // Mise à jour de l'identifiant dans l'objet Java
         commerce.setIdentifiantCommerce(id);

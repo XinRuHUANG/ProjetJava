@@ -17,7 +17,7 @@ public class DechetDAO {
         ArrayList<String> attributs = new ArrayList<>();
         attributs.add("identifiantDechet");
         List<HashMap<String, String>> infos = requeteAvecAffichage(requete, attributs);
-        int id = Integer.parseInt(infos.getFirst().get("identifiantDechet")) + 1;
+        int id = Integer.parseInt(infos.get(0).get("identifiantDechet")) + 1;
 
         //Récupérer les infos du déchet
         dechet.setIdentifiantDechet(id);

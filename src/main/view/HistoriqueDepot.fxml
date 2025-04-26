@@ -10,24 +10,26 @@
 
 <AnchorPane prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.HistoriqueDepotController">
     <children>
-        <TableView layoutX="56.0" layoutY="73.0" prefHeight="154.0" prefWidth="500.0">
+        <TableView layoutX="56.0" layoutY="73.0" prefHeight="166.0" prefWidth="510.0">
             <columns>
-                <TableColumn prefWidth="125.0" text="Date" />
-                <TableColumn prefWidth="125.0" text="Type" />
-                <TableColumn prefWidth="125.0" text="Poids" />
-                <TableColumn prefWidth="125.0" text="Points" />
+            <TableColumn prefWidth="85.0" text="id" />
+                <TableColumn prefWidth="85.0" text="Date" />
+            <TableColumn prefWidth="85.0" text="Heure" />
+                <TableColumn prefWidth="85.0" text="Points" />
+                <TableColumn prefWidth="85.0" text="Type" />
+                <TableColumn prefWidth="85.0" text="Poids" />
             </columns>
         </TableView>
-        <Label layoutX="82.0" layoutY="14.0" text="Historique de mes dépots">
-            <font>
-                <Font size="36.0" />
-            </font>
-        </Label>
         <ButtonBar layoutX="47.0" layoutY="238.0" prefHeight="40.0" prefWidth="200.0">
             <buttons>
                 <Button mnemonicParsing="false" text="Afficher plus" />
                 <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="196.0" text="Retour au meni" />
             </buttons>
         </ButtonBar>
+        <Label layoutX="82.0" layoutY="14.0" text="Historique de mes dépots">
+            <font>
+                <Font size="36.0" />
+            </font>
+        </Label>
     </children>
 </AnchorPane>
