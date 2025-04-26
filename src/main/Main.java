@@ -27,6 +27,10 @@ public class Main extends Application {  // Étendre Application
     private BorderPane rootLayout;
     private File currentFile = null;
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) {
         Label label = new Label("Hello JavaFX!");
@@ -42,7 +46,7 @@ public class Main extends Application {  // Étendre Application
         try {
             // Charge le layout racine depuis le fichier FXML
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Main.class.getResource("view/RootLayout.fxml"));
+            loader.setLocation(Main.class.getResource("/main/view/RootLayout.fxml"));
             rootLayout = loader.load();
 
             // Donne au contrôleur l'accès à mainApp
@@ -201,9 +205,5 @@ public class Main extends Application {  // Étendre Application
 
     public Stage getPrimaryStage() {
         return primaryStage;
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
