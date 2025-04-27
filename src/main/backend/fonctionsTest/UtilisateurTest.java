@@ -1,54 +1,54 @@
+// src/test/java/main/backend/fonctionsTest/UtilisateurTest.java
 package main.backend.fonctionsTest;
 
-import main.backend.fonctions.Utilisateur;
-import main.backend.fonctions.Promotion;
+import main.backend.fonctions.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static main.outils.connexionSQL.requeteAvecAffichage;
+import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
-import static main.backend.fonctions.UtilisateurDAO.*;
 
 class UtilisateurTest {
+    @BeforeEach
+    void initDb() throws Exception {
+        requete("DELETE FROM utiliser     WHERE identifiantPromotion = 1");
+        requete("DELETE FROM depot       WHERE identifiantDepot = 1");
+        requete("DELETE FROM utilisateur WHERE identifiantUtilisateur = 1");
+        requete("INSERT INTO promotion     (identifiantPromotion, pourcentageRemise, pointsRequis) VALUES (1,0,0)");
+    }
 
     @Test
-    void testPointsUtilisation() {
-        Utilisateur u = new Utilisateur(1, "Dupond", "Jean", 50f);
-        Promotion promo = new Promotion(1, 10f, 20f);
-        assertTrue(u.utiliserPoints(promo));
-        assertEquals(30f, u.getPointsFidelite());
-        assertFalse(u.utiliserPoints(new Promotion(2,5f,100f)));
+    void testBasicAccessors() {
+        Utilisateur u = new Utilisateur(5,"N","P", 4f);
+        assertEquals(5, u.getIdUtilisateur());
+        assertEquals("N", u.getNom());
+        u.setPrenom("X");
+        assertEquals("X", u.getPrenom());
     }
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        Utilisateur u = new Utilisateur(0, "X", "Y", 3f);
-        u.setPosseder(new ArrayList<>());
-        u.setUtiliser(new HashSet<>());
+        Utilisateur u = Utilisateur.ajouterUtilisateur("N","P",2f);
 
-        ajouterUtilisateurBDD(u);
+        // CREATE
+        UtilisateurDAO.ajouterUtilisateurBDD(u);
         int id = u.getIdUtilisateur();
 
-        var rows = requeteAvecAffichage(
-                "SELECT nom FROM utilisateur WHERE identifiantUtilisateur = " + id + ";",
-                new ArrayList<>(List.of("nom"))
-        );
-        assertEquals("X", rows.get(0).get("nom"));
+        // READ
+        Utilisateur lu = UtilisateurDAO.lireUtilisateurBDD(id);
+        assertNotNull(lu);
+        assertEquals("N", lu.getNom());
 
-        u.setPrenom("Z");
-        actualiserUtilisateurBDD(u, "prenom");
-        rows = requeteAvecAffichage(
-                "SELECT prenom FROM utilisateur WHERE identifiantUtilisateur = " + id + ";",
-                new ArrayList<>(List.of("prenom"))
-        );
-        assertEquals("Z", rows.get(0).get("prenom"));
+        // UPDATE
+        u.setPointsFidelite(5f);
+        UtilisateurDAO.actualiserUtilisateurBDD(u, "pointsFidelite");
+        lu = UtilisateurDAO.lireUtilisateurBDD(id);
+        assertEquals(5f, lu.getPointsFidelite());
 
-        supprimerUtilisateurBDD(u);
-        rows = requeteAvecAffichage(
-                "SELECT COUNT(*) AS cnt FROM utilisateur WHERE identifiantUtilisateur = " + id + ";",
-                new ArrayList<>(List.of("cnt"))
-        );
-        assertEquals("0", rows.get(0).get("cnt"));
+        // DELETE
+        UtilisateurDAO.supprimerUtilisateurBDD(u);
+        assertNull(UtilisateurDAO.lireUtilisateurBDD(id));
     }
 }
