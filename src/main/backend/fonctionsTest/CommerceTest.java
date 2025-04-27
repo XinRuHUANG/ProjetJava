@@ -13,28 +13,15 @@ class CommerceTest {
 
     @BeforeEach
     void initDb() throws Exception {
-        requete("DELETE FROM commercer;");
-        requete("DELETE FROM proposer;");
-        requete("DELETE FROM commerce;");
-        requete("DELETE FROM centreDeTri;");
-        requete("DELETE FROM contrat;");
-        requete("DELETE FROM categoriedeproduits;");
+        // On supprime juste les anciens commerces de test
+        requete("DELETE FROM proposer WHERE identifiantCommerce = 1;");
+        requete("DELETE FROM commercer WHERE identifiantCommerce = 1;");
+        requete("DELETE FROM commerce WHERE identifiantCommerce = 1;");
 
-        requete(
-                "INSERT INTO centreDeTri " +
-                        "(identifiantCentreDeTri, nom, adresse) " +
-                        "VALUES (1, 'CentreStub', 'AdresseStub');"
-        );
-        requete(
-                "INSERT INTO contrat " +
-                        "(identifiantContrat, dateDebut, dateFin, clauses) " +
-                        "VALUES (1, '2020-01-01', '2020-12-31', 'ClausesStub');"
-        );
-        requete(
-                "INSERT INTO categoriedeproduits " +
-                        "(identifiantCategorieDeProduits, nom) " +
-                        "VALUES (1, 'CatStub');"
-        );
+        // Et on s'assure que les autres prérequis existent
+        requete("INSERT IGNORE INTO CentreDeTri (identifiantCentreDeTri, nom, adresse) VALUES (1, 'CentreStub', 'AdresseStub');");
+        requete("INSERT IGNORE INTO Contrat (identifiantContrat, dateDebut, dateFin, clauses) VALUES (1, '2020-01-01', '2020-12-31', 'ClausesStub');");
+        requete("INSERT IGNORE INTO CategorieDeProduits (identifiantCategorieDeProduits, nom) VALUES (1, 'CatStub');");
     }
 
     @Test
