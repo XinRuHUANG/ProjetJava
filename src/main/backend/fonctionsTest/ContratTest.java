@@ -1,4 +1,3 @@
-// src/test/java/main/backend/fonctionsTest/ContratTest.java
 package main.backend.fonctionsTest;
 
 import main.backend.fonctions.*;
@@ -6,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Map;
 
 import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,14 +13,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class ContratTest {
     @BeforeEach
     void initDb() throws Exception {
-        requete("DELETE FROM definir WHERE identifiantPromotion = 1");
-        requete("DELETE FROM contrat WHERE identifiantContrat = 1");
-        requete("DELETE FROM centredetri WHERE identifiantCentreDeTri = 1");
-        requete("DELETE FROM commerce WHERE identifiantCommerce = 1");
-        requete("DELETE FROM promotion WHERE identifiantPromotion = 1");
-        requete("INSERT INTO centredetri (identifiantCentreDeTri, nom, adresse) VALUES (1,'C1','Adr1')");
-        requete("INSERT INTO commerce      (identifiantCommerce,       nom) VALUES (1,'M1')");
-        requete("INSERT INTO promotion     (identifiantPromotion, pourcentageRemise, pointsRequis) VALUES (1,10.0,5.0)");
+        // Nettoyage des tables dans le bon ordre pour éviter les violations de contraintes
+        requete("DELETE FROM definir;");
+        requete("DELETE FROM commercer;");
+        requete("DELETE FROM contrat;");
+        requete("DELETE FROM promotion;");
+        requete("DELETE FROM centreDeTri;");
+        requete("DELETE FROM commerce;");
+
+        // Réinsertion de données de base
+        requete("INSERT INTO centreDeTri (identifiantCentreDeTri, nom, adresse) VALUES (1, 'CentreTest', 'AdresseTest');");
+        requete("INSERT INTO commerce (identifiantCommerce, nom) VALUES (1, 'CommerceTest');");
+        requete("INSERT INTO promotion (identifiantPromotion, pourcentageRemise, pointsRequis) VALUES (1, 10.0, 5.0);");
     }
 
     @Test
@@ -35,7 +38,7 @@ class ContratTest {
 
     @Test
     void testModifierEquals() {
-        Contrat c = new Contrat(1, LocalDate.of(2020,1,1), LocalDate.of(2020,2,1),
+        Contrat c = new Contrat(1, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 1),
                 "cl", null, null, null);
         c.modifierContrat(Map.of("clauses", "cl2"));
         assertEquals("cl2", c.getClauses());
@@ -45,32 +48,30 @@ class ContratTest {
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        Contrat c = Contrat.ajouterContrat(
-                LocalDate.of(2021,1,1),
-                LocalDate.of(2021,12,31),
-                "clauses",
-                new CentreDeTri(1,"","",new HashSet<>(),new ArrayList<>(),new ArrayList<>()),
-                new Commerce(1,"",new ArrayList<>(),new ArrayList<>(),new HashSet<>()),
-                new Promotion(1,0f,0f)
-        );
+        // 1. Ajouter la promotion
+        Promotion promo = new Promotion(0, 15f, 3f);
+        PromotionDAO.ajouterPromotionBDD(promo);
 
-        // CREATE
+        // 2. Ajouter le contrat
+        Contrat c = new Contrat(0, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), "clauses", null, null, null);
         ContratDAO.ajouterContratBDD(c);
-        int id = c.getIdContrat();
 
-        // READ
-        Contrat lu = ContratDAO.lireContratBDD(id);
+        // 3. Lier contrat à promotion
+        ContratDAO.lierPromotionContrat(c, promo);
+
+        // 4. Tester lecture du contrat
+        Contrat lu = ContratDAO.lireContratBDD(c.getIdContrat());
         assertNotNull(lu);
         assertEquals("clauses", lu.getClauses());
 
-        // UPDATE
-        c.setClauses("cl2");
+        // 5. UPDATE
+        c.setClauses("modif");
         ContratDAO.actualiserContratBDD(c, "clauses");
-        lu = ContratDAO.lireContratBDD(id);
-        assertEquals("cl2", lu.getClauses());
+        lu = ContratDAO.lireContratBDD(c.getIdContrat());
+        assertEquals("modif", lu.getClauses());
 
-        // DELETE
+        // 6. DELETE
         ContratDAO.supprimerContratBDD(c);
-        assertNull(ContratDAO.lireContratBDD(id));
+        assertNull(ContratDAO.lireContratBDD(c.getIdContrat()));
     }
 }
