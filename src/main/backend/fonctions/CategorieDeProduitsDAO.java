@@ -1,94 +1,147 @@
 package main.backend.fonctions;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
-public class CategorieDeProduitsDAO extends CategorieDeProduits {
+import java.util.*;
 
-    public CategorieDeProduitsDAO(int identifiantCategorieDeProduits, String nom, Set<Promotion> concerner, Set<Commerce> proposer) {
-        super(identifiantCategorieDeProduits, nom, concerner, proposer);
+public class CategorieDeProduitsDAO {
+
+    public static void ajouterCategorieDeProduitsBDD(CategorieDeProduits cat) throws Exception {
+        // INSERT
+        requete(
+                "INSERT INTO `CategorieDeProduits` (`nom`) VALUES ('"
+                        + cat.getNom().replace("'", "''") + "');"
+        );
+        // On récupère l'ID tout juste créé
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCategorieDeProduits` " +
+                        "FROM `CategorieDeProduits` " +
+                        "WHERE `nom` = '" + cat.getNom().replace("'", "''") + "' " +
+                        "ORDER BY `identifiantCategorieDeProduits` DESC LIMIT 1;",
+                new ArrayList<>(List.of("identifiantCategorieDeProduits"))
+        );
+        int id = Integer.parseInt(rows.get(0).get("identifiantCategorieDeProduits"));
+        cat.setIdentifiantCategorie(id);
     }
 
-    public static void ajouterCategorieDeProduitsBDD(CategorieDeProduits categorieDeProduits) throws SQLException {
-        // Création de l'identifiant
-        String requete = "SELECT MAX(identifiantCategorieDeProduits) FROM categoriedeproduits;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantCategorieDeProduits");
-
-        List<HashMap<String,String>> infos =
-                requeteAvecAffichage(requete, attributs);
-        String maxStr = infos.get(0).get("identifiantCategorieDeProduits");
-        int previousMax = (maxStr != null) ? Integer.parseInt(maxStr) : 0;
-        int id = previousMax + 1;
-
-        // Mise à jour de l'identifiant dans l'objet Java
-        categorieDeProduits.setIdentifiantCategorie(id);
-        String nom = categorieDeProduits.getNom();
-        Set<Promotion> concerner = categorieDeProduits.getConcerner();
-        Set<Commerce> proposer = categorieDeProduits.getProposer();
-
-        // Insertion dans la BDD
-        requete = "INSERT INTO categoriedeproduits(identifiantCategorieDeProduits, nom) " +
-                "VALUES (" + id + ", '" + nom + "');";
-        requete(requete);
-
-        if (categorieDeProduits.getConcerner() != null) {
-            for (Promotion p : categorieDeProduits.getConcerner()) {
-                requete = "INSERT INTO concerner(identifiantCategorieDeProduits, identifiantPromotion) " +
-                        "VALUES (" + id + "," + p.getIdPromotion() + ");";
-                requete(requete);
-            }
-        }
-
-        if (categorieDeProduits.getProposer() != null) {
-            for (Commerce c : categorieDeProduits.getProposer()) {
-                requete = "INSERT INTO proposer(identifiantCategorieDeProduits, identifiantCommerce) " +
-                        "VALUES (" + id + "," + c.getIdentifiantCommerce() + ");";
-                requete(requete);
-            }
-        }
+    public static CategorieDeProduits lireCategorieDeproduitsBDD(int id) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `nom` FROM `CategorieDeProduits` " +
+                        "WHERE `identifiantCategorieDeProduits` = " + id + ";",
+                new ArrayList<>(List.of("nom"))
+        );
+        if (rows.isEmpty()) return null;
+        String nom = rows.get(0).get("nom");
+        Set<Promotion> promos    = PromotionDAO.lirePromotionsParCategorie(id);
+        Set<Commerce>  commerces = CommerceDAO.lireCommercesParCategorie(id);
+        return new CategorieDeProduits(id, nom, promos, commerces);
     }
 
-    public static void supprimerCategorieDeProduitsBDD(CategorieDeProduits categorieDeProduits) {
-        int id = categorieDeProduits.getIdentifiantCategorie();
-        String requete = "DELETE FROM proposer WHERE identifiantCategorieDeProduits = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM concerner WHERE identifiantCategorieDeProduits = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM categoriedeproduits WHERE identifiantCategorieDeProduits = " + id + ";";
-        requete(requete);
+    public static List<CategorieDeProduits> lireToutesCategoriesBDD() throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCategorieDeProduits` FROM `CategorieDeProduits`;",
+                new ArrayList<>(List.of("identifiantCategorieDeProduits"))
+        );
+        var result = new ArrayList<CategorieDeProduits>();
+        for (var r : rows) {
+            int id = Integer.parseInt(r.get("identifiantCategorieDeProduits"));
+            result.add(lireCategorieDeproduitsBDD(id));
+        }
+        return result;
     }
 
-    public static void actualiserCategorieDeProduitsBDD(CategorieDeProduits categorieDeProduits, String instruction) {
-        int id = categorieDeProduits.getIdentifiantCategorie();
-        String requete;
-        if (instruction.equals("nom")) {
-            requete = "UPDATE categoriedeproduits SET nom = '" + categorieDeProduits.getNom() + "' WHERE identifiantCategorieDeProduits = " + id + ";";
-            requete(requete);
+    public static void actualiserCategorieDeproduitsBDD(CategorieDeProduits cat, String... cols) throws Exception {
+        if (cols.length == 0) return;
+        StringBuilder sb = new StringBuilder("UPDATE `CategorieDeProduits` SET ");
+        for (int i = 0; i < cols.length; i++) {
+            String c = cols[i];
+            sb.append("`").append(c).append("` = '")
+                    .append(c.equals("nom") ? cat.getNom().replace("'", "''") : "")
+                    .append("'");
+            if (i < cols.length - 1) sb.append(", ");
         }
-        if (instruction.equals("concerner")) {
-            Set<Promotion> concerner = categorieDeProduits.getConcerner();
-            requete = "DELETE FROM concerner WHERE identifiantCategorieDeProduits = " + id + ";";
-            requete(requete);
-            for (Promotion promotion : concerner) {
-                requete = "INSERT INTO concerner(identifiantCategorieDeProduits, identifiantPromotion) VALUES (" + id + "," + promotion.getIdPromotion() + ");";
-                requete(requete);
-            }
+        sb.append(" WHERE `identifiantCategorieDeProduits` = ")
+                .append(cat.getIdentifiantCategorie()).append(";");
+        requete(sb.toString());
+    }
+
+    public static void supprimerCategorieDeproduitsBDD(CategorieDeProduits cat) throws Exception {
+        requete(
+                "DELETE FROM `CategorieDeProduits` " +
+                        "WHERE `identifiantCategorieDeProduits` = "
+                        + cat.getIdentifiantCategorie() + ";"
+        );
+    }
+
+    public static Set<Promotion> lirePromotionsParCategorie(int idCat) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantPromotion` FROM `concerner` " +
+                        "WHERE `identifiantCategorieDeProduits` = " + idCat + ";",
+                new ArrayList<>(List.of("identifiantPromotion"))
+        );
+        var set = new HashSet<Promotion>();
+        for (var r : rows) {
+            int idPromo = Integer.parseInt(r.get("identifiantPromotion"));
+            set.add(PromotionDAO.lirePromotionBDD(idPromo));
         }
-        if (instruction.equals("proposer")) {
-            Set<Commerce> proposer = categorieDeProduits.getProposer();
-            requete = "DELETE FROM proposer WHERE identifiantCategorieDeProduits = " + id + ";";
-            requete(requete);
-            for (Commerce commerce : proposer) {
-                requete = "INSERT INTO proposer(identifiantCategorieDeProduits, identifiantCommerce) VALUES (" + id + "," + commerce.getIdentifiantCommerce() + ");";
-                requete(requete);
-            }
+        return set;
+    }
+
+    public static Set<CategorieDeProduits> lireCategoriesParPromotion(int idPromo) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCategorieDeProduits` FROM `concerner` " +
+                        "WHERE `identifiantPromotion` = " + idPromo + ";",
+                new ArrayList<>(List.of("identifiantCategorieDeProduits"))
+        );
+        var set = new HashSet<CategorieDeProduits>();
+        for (var r : rows) {
+            int idCat = Integer.parseInt(r.get("identifiantCategorieDeProduits"));
+            set.add(lireCategorieDeproduitsBDD(idCat));
         }
+        return set;
+    }
+
+    public static CategorieDeProduits lireCategorieBDD(int idCategorie) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `nom` FROM `CategorieDeProduits` " +
+                        "WHERE `identifiantCategorieDeProduits` = " + idCategorie + ";",
+                new ArrayList<>(List.of("nom"))
+        );
+        if (rows.isEmpty()) return null;
+        String nom = rows.get(0).get("nom");
+        return new CategorieDeProduits(idCategorie, nom, new HashSet<>(), new HashSet<>());
+    }
+
+    public static CategorieDeProduits lireCategorieBDDParPromotion(int idPromotion) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT c.`identifiantCategorieDeProduits`, c.`nom` " +
+                        "FROM `CategorieDeProduits` c " +
+                        "JOIN `concerner` ce ON c.`identifiantCategorieDeProduits` = ce.`identifiantCategorieDeProduits` " +
+                        "WHERE ce.`identifiantPromotion` = " + idPromotion + ";",
+                new ArrayList<>(List.of("identifiantCategorieDeProduits","nom"))
+        );
+        if (rows.isEmpty()) return null;
+        var row = rows.get(0);
+        int id   = Integer.parseInt(row.get("identifiantCategorieDeProduits"));
+        String nom = row.get("nom");
+        return new CategorieDeProduits(id, nom, new HashSet<>(), new HashSet<>());
+    }
+
+    public static Set<CategorieDeProduits> lireCategoriesParCommerce(int idCommerce) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT cp.`identifiantCategorieDeproduits`, cp.`nom` " +
+                        "FROM `CategorieDeProduits` cp " +
+                        "JOIN `proposer` p ON cp.`identifiantCategorieDeProduits` = p.`identifiantCategorieDeProduits` " +
+                        "WHERE p.`identifiantCommerce` = " + idCommerce + ";",
+                new ArrayList<>(List.of("identifiantCategorieDeProduits","nom"))
+        );
+        var result = new HashSet<CategorieDeProduits>();
+        for (var row : rows) {
+            int    id  = Integer.parseInt(row.get("identifiantCategorieDeProduits"));
+            String nom = row.get("nom");
+            result.add(new CategorieDeProduits(id, nom, new HashSet<>(), new HashSet<>()));
+        }
+        return result;
     }
 }
