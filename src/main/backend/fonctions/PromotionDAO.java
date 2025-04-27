@@ -1,8 +1,11 @@
 package main.backend.fonctions;
 
+import main.outils.connexionSQL;
+
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
+import java.sql.*;
 import java.util.*;
 import java.time.LocalDate;
 
@@ -11,26 +14,29 @@ public class PromotionDAO {
     /**
      * Insère une promotion en base et récupère son ID.
      */
-    public static void ajouterPromotionBDD(Promotion promo) throws Exception {
-        String sql = String.format(
-                "INSERT INTO promotion (pourcentageRemise, pointsRequis) VALUES (%f, %f);",
-                promo.getPourcentageRemise(),
-                promo.getPointsRequis()
-        );
-        requete(sql);
+    public static void ajouterPromotionBDD(Promotion promotion) throws Exception {
+        String sql = "INSERT INTO promotion (pourcentageRemise, pointsRequis) VALUES (?, ?)";
 
-        var rows = requeteAvecAffichage(
-                "SELECT identifiantPromotion AS id\n" +
-                        "  FROM promotion\n" +
-                        " ORDER BY identifiantPromotion DESC\n" +
-                        " LIMIT 1;",
-                new ArrayList<>(Arrays.asList("id"))
-        );
-        if (rows.isEmpty()) {
-            throw new Exception("Impossible de récupérer l'ID de la promotion insérée");
+        try (
+                Connection conn = DriverManager.getConnection(connexionSQL.url, connexionSQL.user, connexionSQL.password);
+                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            pstmt.setFloat(1, promotion.getPourcentageRemise());
+            pstmt.setFloat(2, promotion.getPointsRequis());
+
+            pstmt.executeUpdate();
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    promotion.setIdPromotion(rs.getInt(1));
+                } else {
+                    throw new IllegalStateException("Erreur lors de la récupération de l'ID généré pour la promotion !");
+                }
+            }
         }
-        promo.setIdPromotion(Integer.parseInt(rows.get(0).get("id")));
     }
+
+
 
     /**
      * Lit une promotion complète (avec catégorie, contrat et utilisateurs).
