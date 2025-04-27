@@ -1,83 +1,69 @@
+// DechetDAO.java
 package main.backend.fonctions;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
-import static main.backend.fonctions.TypeDechetEnum.TypeDechet;
 
 public class DechetDAO {
-
-    public static void ajouterDechetBDD(Dechet dechet) throws SQLException {
-
-        // Récupérer le dernier identifiant
-        String requete = "SELECT MAX(identifiantDechet) FROM dechet;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantDechet");
-
-        List<HashMap<String,String>> infos =
-                requeteAvecAffichage(requete, attributs);
-        String maxStr = infos.get(0).get("identifiantDechet");
-        int previousMax = (maxStr != null) ? Integer.parseInt(maxStr) : 0;
-        int id = previousMax + 1;
-
-        // Récupérer les infos du déchet
-        dechet.setIdentifiantDechet(id);
-        TypeDechet type = dechet.getType(); // enum -> String
-        Depot contenir = dechet.getContenir();
-        int idDepot = contenir.getIdentifiantDepot();  // Obtenir l'identifiant du dépôt via la classe depot
-
-        requete = "INSERT INTO dechet(identifiantDechet, type, identifiantDepot) VALUES (" +
-                id + ", '" + type + "', " + idDepot + ");"; // <-- ajouté ' autour de type
-        requete(requete);
-
-        if (dechet.getContenir() != null) {
-            requete = "INSERT INTO contenir(identifiantDechet, identifiantDepot) VALUES (" +
-                    id + ", " + dechet.getContenir().getIdentifiantDepot() + ");";
-            requete(requete);
-        }
-
-        if (dechet.getStocker() != null) {
-            requete = "INSERT INTO stocker(identifiantDechet, identifiantPoubelleIntelligente) VALUES (" +
-                    id + ", " + dechet.getStocker().getIdentifiantPoubelle() + ");";
-            requete(requete);
-        }
+    public static void ajouterDechetBDD(Dechet d) throws Exception {
+        requete("INSERT INTO dechet (type, identifiantDepot, identifiantPoubelleIntelligente) VALUES ('"
+                + d.getType() + "'," + d.getContenir().getIdentifiantDepot() + "," + d.getStocker().getIdentifiantPoubelle() + ")");
+        var rows = requeteAvecAffichage("SELECT LAST_INSERT_ID() AS id", new ArrayList<>(Arrays.asList("id")));
+        d.setIdentifiantDechet(Integer.parseInt(rows.get(0).get("id")));
     }
 
-    public static void supprimerDechetBDD(Dechet dechet) {
-        int id = dechet.getIdentifiantDechet();
-        // Suppression du déchet de la table contenir
-        String requete = "DELETE FROM contenir WHERE identifiantDechet = " + id + ";";
-        requete(requete);
-        // Supprimer le déchet de la table Dechet
-        requete = "DELETE FROM dechet WHERE identifiantDechet = " + id + ";";
-        requete(requete);
-        // Supprimer le déchet de la table stocker
-        requete = "DELETE FROM stocker WHERE identifiantDechet = " + id + ";";
-        requete(requete);
+    public static Dechet lireDechetBDD(int id) throws Exception {
+        var cols = new ArrayList<>(Arrays.asList("type","identifiantDepot","identifiantPoubelleIntelligente"));
+        var rows = requeteAvecAffichage("SELECT type,identifiantDepot,identifiantPoubelleIntelligente FROM dechet WHERE identifiantDechet = " + id, cols);
+        if (rows.isEmpty()) return null;
+        var r = rows.get(0);
+        Depot depot = DepotDAO.lireDepotBDD(Integer.parseInt(r.get("identifiantDepot")));
+        PoubelleIntelligente pi = PoubelleIntelligenteDAO.lirePoubelleIntelligenteBDD(Integer.parseInt(r.get("identifiantPoubelleIntelligente")));
+        return new Dechet(id, TypeDechetEnum.TypeDechet.valueOf(r.get("type")), depot, pi);
     }
 
-    public static void actualiserDechetBDD(Dechet dechet, String instruction) {
-        int identifiantDechet = dechet.getIdentifiantDechet();
-        String requete;
-        if (instruction.equals("type")) {
-            requete = "UPDATE dechet SET type = '" + dechet.getType() + "' WHERE identifiantDechet = " + identifiantDechet + ";";
-            requete(requete);
+    public static void actualiserDechetBDD(Dechet d, String... champs) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (String f : champs) {
+            sb.append(f).append("='");
+            switch(f) {
+                case "type": sb.append(d.getType()); break;
+                default: continue;
+            }
+            sb.append("',");
         }
-        if (instruction.equals("contenir")) {
-            requete = "UPDATE contenir SET identifiantDepot = " + dechet.getContenir().getIdentifiantDepot() +
-                    " WHERE identifiantDechet = " + identifiantDechet + ";";
-            requete(requete);
+        String setClause = sb.substring(0, sb.length()-1);
+        requete("UPDATE dechet SET " + setClause + " WHERE identifiantDechet = " + d.getIdentifiantDechet());
+    }
+
+    public static void supprimerDechetBDD(Dechet d) throws Exception {
+        requete("DELETE FROM dechet WHERE identifiantDechet = " + d.getIdentifiantDechet());
+    }
+
+    public static List<Dechet> lireDechetsParDepot(int idDepot) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT identifiantDechet, typeDechet, identifiantPoubelleIntelligente " +
+                        "FROM dechet WHERE identifiantDepot = " + idDepot + ";",
+                new ArrayList<String>(Arrays.asList(
+                        "identifiantDechet",
+                        "typeDechet",
+                        "identifiantPoubelleIntelligente"
+                ))
+        );
+        var result = new ArrayList<Dechet>();
+        for (var row : rows) {
+            int id = Integer.parseInt(row.get("identifiantDechet"));
+            var type = TypeDechetEnum.TypeDechet.valueOf(row.get("typeDechet"));
+            Depot dpt = DepotDAO.lireDepotBDD(idDepot);
+            PoubelleIntelligente pib = PoubelleIntelligenteDAO.lirePoubelleBDD(
+                    Integer.parseInt(row.get("identifiantPoubelleIntelligente"))
+            );
+            result.add(new Dechet(id, type, dpt, pib));
         }
-        if (instruction.equals("stocker")) {
-            requete = "DELETE FROM stocker WHERE identifiantDechet = " + identifiantDechet + ";";
-            requete(requete);
-            requete = "INSERT INTO stocker(identifiantDechet, identifiantPoubelleIntelligente) VALUES (" +
-                    identifiantDechet + ", " + dechet.getStocker().getIdentifiantPoubelle() + ");";
-            requete(requete);
-        }
+        return result;
     }
 }
