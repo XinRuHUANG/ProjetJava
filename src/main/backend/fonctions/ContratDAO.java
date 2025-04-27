@@ -1,91 +1,146 @@
 package main.backend.fonctions;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 public class ContratDAO {
-
-    public static void ajouterContratBDD(Contrat contrat) throws SQLException {
-        // Récupérer le dernier identifiant
-        String requete = "SELECT MAX(identifiantContrat) FROM contrat;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantContrat");
-
-        List<HashMap<String,String>> infos =
-                requeteAvecAffichage(requete, attributs);
-        String maxStr = infos.get(0).get("identifiantContrat");
-        int previousMax = (maxStr != null) ? Integer.parseInt(maxStr) : 0;
-        int id = previousMax + 1;
-
-        // Récupérer les infos du contrat
-        contrat.setIdContrat(id);
-        String dateDebut = contrat.getDateDebut().toString();
-        String dateFin = contrat.getDateFin().toString();
-        String clauses = contrat.getClauses();
-        int idCentre = contrat.getCommercer().getIdCentreDeTri();
-
-        requete = "INSERT INTO contrat(identifiantContrat, dateDebut, dateFin, clauses, identifiantCentreDeTri) VALUES (" +
-                id + ", '" + dateDebut + "', '" + dateFin + "', '" + clauses + "', " + idCentre + ");";
-        requete(requete);
-
-        if (contrat.getDefinir() != null) {
-            requete = "INSERT INTO definir(identifiantContrat, identifiantPromotion) VALUES (" +
-                    id + ", " + contrat.getDefinir().getIdPromotion() + ");";
-            requete(requete);
-        }
-
-        if (contrat.getCommerce() != null && contrat.getCommercer() != null) {
-            requete = "INSERT INTO commercer(identifiantCentreDeTri, identifiantCommerce, identifiantContrat) VALUES (" +
-                    contrat.getCommercer().getIdCentreDeTri() + "," +
-                    contrat.getCommerce().getIdentifiantCommerce() + "," +
-                    id + ");";
-            requete(requete);
+    public static void ajouterContratBDD(Contrat c) throws Exception {
+        requete("INSERT INTO contrat (dateDebut, dateFin, clauses, identifiantCentreDeTri, identifiantCommerce) " +
+                "VALUES ('" + c.getDateDebut() + "','" + c.getDateFin() + "','" + c.getClauses() + "'," +
+                c.getCommercer().getIdCentreDeTri() + "," + c.getCommerce().getIdentifiantCommerce() + ")");
+        var rows = requeteAvecAffichage("SELECT LAST_INSERT_ID() AS id", new ArrayList<>(Arrays.asList("id")));
+        c.setIdContrat(Integer.parseInt(rows.get(0).get("id")));
+        // associations
+        Promotion def = c.getDefinir();
+        if (def != null) {
+            requete("INSERT INTO definir (identifiantContrat, identifiantPromotion) VALUES (" + c.getIdContrat() + "," + def.getIdPromotion() + ")");
         }
     }
 
-    public static void supprimerContratBDD(Contrat contrat) {
-        int id = contrat.getIdContrat();
-        String requete = "DELETE FROM definir WHERE identifiantContrat = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM commercer WHERE identifiantContrat = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM contrat WHERE identifiantContrat = " + id + ";";
-        requete(requete);
+
+    /**
+     * Lit le contrat associé à une promotion donnée.
+     */
+    public static Contrat lireContratParPromotion(int idPromotion) throws Exception {
+        // On récupère l'identifiant du contrat lié à cette promotion
+        List<HashMap<String,String>> rows = requeteAvecAffichage(
+                "SELECT identifiantContrat FROM contrat WHERE identifiantPromotion = " + idPromotion + ";",
+                new ArrayList<>(Arrays.asList("identifiantContrat"))
+        );
+        if (rows.isEmpty()) {
+            return null;
+        }
+        int idContrat = Integer.parseInt(rows.get(0).get("identifiantContrat"));
+        // On délègue ensuite à la méthode de lecture standard
+        return lireContratBDD(idContrat);
     }
 
-    public static void actualiserContratBDD(Contrat contrat, String instruction) {
-        int id = contrat.getIdContrat();
-        String requete;
-        if (instruction.equals("dateDebut")) {
-            requete = "UPDATE contrat SET dateDebut = '" + contrat.getDateDebut() + "' WHERE identifiantContrat = " + id + ";";
-            requete(requete);
+    public static Contrat lireContratBDD(int id) throws Exception {
+        var cols = new ArrayList<>(Arrays.asList("dateDebut","dateFin","clauses","identifiantCentreDeTri","identifiantCommerce"));
+        var rows = requeteAvecAffichage("SELECT dateDebut,dateFin,clauses,identifiantCentreDeTri,identifiantCommerce FROM contrat WHERE identifiantContrat = " + id, cols);
+        if (rows.isEmpty()) return null;
+        var r = rows.get(0);
+        CentreDeTri ct = CentreDeTriDAO.lireCentreDeTriBDD(Integer.parseInt(r.get("identifiantCentreDeTri")));
+        Commerce cm = CommerceDAO.lireCommerceBDD(Integer.parseInt(r.get("identifiantCommerce")));
+        Contrat c = new Contrat(id,
+                LocalDate.parse(r.get("dateDebut")),
+                LocalDate.parse(r.get("dateFin")),
+                r.get("clauses"), ct, cm, null);
+        // définir
+        Promotion p = PromotionDAO.lirePromotionParContrat(id);
+        c.setDefinir(p);
+        return c;
+    }
+
+    public static void actualiserContratBDD(Contrat c, String... champs) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (String f : champs) {
+            sb.append(f).append("='");
+            switch(f) {
+                case "dateDebut": sb.append(c.getDateDebut()); break;
+                case "dateFin": sb.append(c.getDateFin()); break;
+                case "clauses": sb.append(c.getClauses()); break;
+                default: continue;
+            }
+            sb.append("',");
         }
-        if (instruction.equals("dateFin")) {
-            requete = "UPDATE contrat SET dateFin = '" + contrat.getDateFin() + "' WHERE identifiantContrat = " + id + ";";
-            requete(requete);
+        String setClause = sb.substring(0, sb.length()-1);
+        requete("UPDATE contrat SET " + setClause + " WHERE identifiantContrat = " + c.getIdContrat());
+    }
+
+    public static void supprimerContratBDD(Contrat c) throws Exception {
+        requete("DELETE FROM contrat WHERE identifiantContrat = " + c.getIdContrat());
+    }
+
+    // association
+    public static Promotion readPromotionParContrat(int idContrat) throws Exception {
+        var cols = new ArrayList<>(Arrays.asList("identifiantPromotion"));
+        var rows = requeteAvecAffichage("SELECT identifiantPromotion FROM definir WHERE identifiantContrat = " + idContrat, cols);
+        if (rows.isEmpty()) return null;
+        return PromotionDAO.lirePromotionBDD(Integer.parseInt(rows.get(0).get("identifiantPromotion")));
+    }
+
+    public static List<Contrat> lireContratsParCentre(int idCentre) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT identifiantContrat, dateDebut, dateFin, clauses, identifiantCommerce " +
+                        "FROM contrat WHERE identifiantCentreDeTri = " + idCentre + ";",
+                new ArrayList<String>(Arrays.asList(
+                        "identifiantContrat",
+                        "dateDebut",
+                        "dateFin",
+                        "clauses",
+                        "identifiantCommerce"
+                ))
+        );
+        var result = new ArrayList<Contrat>();
+        for (var row : rows) {
+            int id    = Integer.parseInt(row.get("identifiantContrat"));
+            LocalDate d1 = LocalDate.parse(row.get("dateDebut"));
+            LocalDate d2 = LocalDate.parse(row.get("dateFin"));
+            String clauses = row.get("clauses");
+            Commerce cm = CommerceDAO.lireCommerceBDD(
+                    Integer.parseInt(row.get("identifiantCommerce")));
+            CentreDeTri ct = CentreDeTriDAO.lireCentreDeTriBDD(idCentre);
+            Promotion pr = PromotionDAO.lirePromotionParContrat(id);
+            result.add(new Contrat(id, d1, d2, clauses, ct, cm, pr));
         }
-        if (instruction.equals("clauses")) {
-            requete = "UPDATE contrat SET clauses = '" + contrat.getClauses() + "' WHERE identifiantContrat = " + id + ";";
-            requete(requete);
+        return result;
+    }
+
+    /**
+     * Renvoie tous les contrats pour un commerce donné.
+     */
+    public static List<Contrat> lireContratsParCommerce(int idCommerce) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT identifiantContrat, dateDebut, dateFin, clauses, identifiantCentreDeTri " +
+                        "FROM contrat WHERE identifiantCommerce = " + idCommerce + ";",
+                new ArrayList<String>(Arrays.asList(
+                        "identifiantContrat",
+                        "dateDebut",
+                        "dateFin",
+                        "clauses",
+                        "identifiantCentreDeTri"
+                ))
+        );
+        var result = new ArrayList<Contrat>();
+        for (var row : rows) {
+            int id    = Integer.parseInt(row.get("identifiantContrat"));
+            LocalDate d1 = LocalDate.parse(row.get("dateDebut"));
+            LocalDate d2 = LocalDate.parse(row.get("dateFin"));
+            String clauses = row.get("clauses");
+            CentreDeTri ct = CentreDeTriDAO.lireCentreDeTriBDD(
+                    Integer.parseInt(row.get("identifiantCentreDeTri")));
+            Commerce cm = CommerceDAO.lireCommerceBDD(idCommerce);
+            Promotion pr = PromotionDAO.lirePromotionParContrat(id);
+            result.add(new Contrat(id, d1, d2, clauses, ct, cm, pr));
         }
-        if (instruction.equals("commercer") || instruction.equals("commerce")) {
-            requete = "DELETE FROM commercer WHERE identifiantContrat = " + id + ";";
-            requete(requete);
-            requete = "INSERT INTO commercer(identifiantContrat, identifiantCommerce, identifiantCentreDeTri) VALUES (" +
-                    id + "," + contrat.getCommerce().getIdentifiantCommerce() + "," + contrat.getCommercer().getIdCentreDeTri() + ");";
-            requete(requete);
-        }
-        if (instruction.equals("definir")) {
-            requete = "DELETE FROM definir WHERE identifiantContrat = " + id + ";";
-            requete(requete);
-            requete = "INSERT INTO definir(identifiantContrat, identifiantPromotion) VALUES (" +
-                    id + "," + contrat.getDefinir().getIdPromotion() + ");";
-            requete(requete);
-        }
+        return result;
     }
 }
+
