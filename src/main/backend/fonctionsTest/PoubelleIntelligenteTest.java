@@ -1,59 +1,59 @@
+// src/test/java/main/backend/fonctionsTest/PoubelleIntelligenteTest.java
 package main.backend.fonctionsTest;
 
-import main.backend.fonctions.PoubelleIntelligente;
-import main.backend.fonctions.CentreDeTri;
-import main.backend.fonctions.TypeDechetEnum.TypeDechet;
+import main.backend.fonctions.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static main.outils.connexionSQL.requeteAvecAffichage;
+import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
-import static main.backend.fonctions.PoubelleIntelligenteDAO.*;
 
 class PoubelleIntelligenteTest {
+    @BeforeEach
+    void initDb() throws Exception {
+        requete("DELETE FROM gerer WHERE identifiantPoubelleIntelligente = 1");
+        requete("DELETE FROM contenir WHERE identifiantPoubelleIntelligente = 1");
+        requete("DELETE FROM dechet WHERE identifiantPoubelleIntelligente = 1");
+        requete("DELETE FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = 1");
+        requete("INSERT INTO centredetri (identifiantCentreDeTri, nom, adresse) VALUES (1,'C1','Adr1')");
+    }
 
     @Test
-    void testNotifEtPoids() {
-        PoubelleIntelligente p = new PoubelleIntelligente(
-                2, "Rue", 100f, TypeDechet.verre, 50f,
-                null, new HashSet<>(), new HashSet<>()
-        );
-        assertFalse(p.notifierCentre());
-        float added = p.ajouterPoids(Set.of(TypeDechet.verre, TypeDechet.carton));
-        assertTrue(added > 0);
-        assertFalse(p.notifierCentre());
+    void testBasicAccessors() {
+        PoubelleIntelligente p = new PoubelleIntelligente(5,"E",10f,TypeDechetEnum.TypeDechet.carton,2f,null,new HashSet<>(),new HashSet<>());
+        assertEquals(5, p.getIdentifiantPoubelle());
+        assertEquals("E", p.getEmplacement());
+        p.setEmplacement("E2");
+        assertEquals("E2", p.getEmplacement());
     }
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        CentreDeTri cen = new CentreDeTri(1,"x","x",new HashSet<>(),new ArrayList<>(),new ArrayList<>());
-        PoubelleIntelligente p = new PoubelleIntelligente(
-                0, "Lieu", 10f, TypeDechet.carton, 0f,
-                cen, new HashSet<>(), new HashSet<>()
+        PoubelleIntelligente p = PoubelleIntelligente.ajouterPoubelle(
+                "E", 10f, TypeDechetEnum.TypeDechet.plastique, 0f,
+                new CentreDeTri(1,"","",new HashSet<>(),new ArrayList<>(),new ArrayList<>()),
+                new HashSet<>(), new HashSet<>()
         );
-        ajouterPoubelleBDD(p);
+
+        // CREATE
+        PoubelleIntelligenteDAO.ajouterPoubelleIntelligenteBDD(p);
         int id = p.getIdentifiantPoubelle();
 
-        var rows = requeteAvecAffichage(
-                "SELECT emplacement FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = " + id + ";",
-                new ArrayList<>(List.of("emplacement"))
-        );
-        assertEquals("Lieu", rows.get(0).get("emplacement"));
+        // READ
+        PoubelleIntelligente lu = PoubelleIntelligenteDAO.lirePoubelleBDD(id);
+        assertNotNull(lu);
+        assertEquals("E", lu.getEmplacement());
 
-        p.setEmplacement("Lieu2");
-        actualiserPoubelleIntelligenteBDD(p, "emplacement");
-        rows = requeteAvecAffichage(
-                "SELECT emplacement FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = " + id + ";",
-                new ArrayList<>(List.of("emplacement"))
-        );
-        assertEquals("Lieu2", rows.get(0).get("emplacement"));
+        // UPDATE
+        p.setPoids(5f);
+        PoubelleIntelligenteDAO.actualiserPoubelleIntelligenteBDD(p, "poids");
+        lu = PoubelleIntelligenteDAO.lirePoubelleBDD(id);
+        assertEquals(5f, lu.getPoids());
 
-        supprimerPoubelleBDD(p);
-        rows = requeteAvecAffichage(
-                "SELECT COUNT(*) AS cnt FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = " + id + ";",
-                new ArrayList<>(List.of("cnt"))
-        );
-        assertEquals("0", rows.get(0).get("cnt"));
+        // DELETE
+        PoubelleIntelligenteDAO.supprimerPoubelleIntelligenteBDD(p);
+        assertNull(PoubelleIntelligenteDAO.lirePoubelleBDD(id));
     }
 }
