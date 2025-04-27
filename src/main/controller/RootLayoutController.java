@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
-import main.Main;
+import main.backend.fonctions.Main;
 
 /**
  * The controller for the root layout. The root layout provides the basic

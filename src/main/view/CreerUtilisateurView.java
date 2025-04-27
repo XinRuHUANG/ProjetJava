@@ -8,8 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import main.Utilisateur;
-import main.UtilisateurDAO;
+import main.backend.fonctions.Utilisateur;
+import main.backend.fonctions.UtilisateurDAO;
 
 public class CreerUtilisateurView extends Application {
 

@@ -10,14 +10,12 @@
 
 <AnchorPane prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.HistoriqueDepotController">
     <children>
-        <TableView layoutX="56.0" layoutY="73.0" prefHeight="166.0" prefWidth="510.0">
+        <TableView layoutX="56.0" layoutY="73.0" prefHeight="166.0" prefWidth="500.0">
             <columns>
-            <TableColumn prefWidth="85.0" text="id" />
-                <TableColumn prefWidth="85.0" text="Date" />
-            <TableColumn prefWidth="85.0" text="Heure" />
-                <TableColumn prefWidth="85.0" text="Points" />
-                <TableColumn prefWidth="85.0" text="Type" />
-                <TableColumn prefWidth="85.0" text="Poids" />
+            <TableColumn prefWidth="125.0" text="id" />
+                <TableColumn prefWidth="125.0" text="Date" />
+            <TableColumn prefWidth="125.0" text="Heure" />
+                <TableColumn prefWidth="125.0" text="Points" />
             </columns>
         </TableView>
         <ButtonBar layoutX="47.0" layoutY="238.0" prefHeight="40.0" prefWidth="200.0">

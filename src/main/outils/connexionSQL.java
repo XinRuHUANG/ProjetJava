@@ -4,80 +4,65 @@ import java.sql.*;
 import java.util.*;
 
 public class connexionSQL {
-    public static final String url      = "jdbc:mysql://localhost:3306/projetjava";
-    public static final String user     = "root";
-    public static final String password = "";
+    //Constantes
+    public static final String url = "jdbc:mysql://localhost:3306/ma_base";
+    public static final String user = "root";
+    public static final String password = "ton_mot_de_passe";
 
-    public connexionSQL() { }
+    public connexionSQL() {
+    }
+    public static void requete(String requete){
 
-    /**
-     * Exécute une requête d’action (INSERT/UPDATE/DELETE) ou un SELECT sans renvoyer de résultat.
-     */
-    public static void requete(String requete) {
-        String trimmed = requete.trim().toUpperCase(Locale.ROOT);
-        boolean isSelect = trimmed.startsWith("SELECT");
-        try (
-                Connection conn    = DriverManager.getConnection(url, user, password);
-                Statement  statement = conn.createStatement()
-        ) {
-            if (isSelect) {
-                try (ResultSet rs = statement.executeQuery(requete)) {
-                    // on ignore le résultat
-                }
-            } else {
-                statement.executeUpdate(requete);
-            }
+        try {
+            // Etape 1 : Etablir la connexion
+            Connection connection = DriverManager.getConnection(url, user, password);
+
+            // Etape 2 : Créer un Statement
+            Statement statement = connection.createStatement();
+
+            ResultSet resultSet = statement.executeQuery(requete);
+
+            resultSet.close();
+            statement.close();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Pour un SELECT : renvoie la liste de HashMap[colonne→valeur] pour chaque ligne.
-     * Pour un INSERT/UPDATE/DELETE : renvoie une liste à un seul élément
-     * contenant la clé générée (attributs.get(0)) dans le champ indexé 1 du ResultSet.
-     */
-    public static List<HashMap<String, String>> requeteAvecAffichage(
-            String requete,
-            ArrayList<String> attributs
-    ) throws SQLException {
-        List<HashMap<String, String>> result = new ArrayList<>();
-        String trimmed = requete.trim().toUpperCase(Locale.ROOT);
+    public static List<HashMap<String, String>> requeteAvecAffichage(String requete, ArrayList<String> attributs) {
+        List<HashMap<String, String>> infos = new ArrayList<>();
 
-        try (
-                Connection conn = DriverManager.getConnection(url, user, password);
-                Statement  stmt = conn.createStatement()
-        ) {
-            if (trimmed.startsWith("SELECT")) {
-                try (ResultSet rs = stmt.executeQuery(requete)) {
-                    while (rs.next()) {
-                        HashMap<String,String> ligne = new HashMap<>();
-                        // -> Lire chaque colonne par son index (1-based),
-                        //    et stocker sous le nom Java voulu.
-                        for (int i = 0; i < attributs.size(); i++) {
-                            String cle = attributs.get(i);
-                            String val = rs.getString(i + 1);
-                            ligne.put(cle, val);
-                        }
-                        result.add(ligne);
-                    }
+        try {
+            // Étape 1 : Établir la connexion
+            Connection connection = DriverManager.getConnection(url, user, password);
+
+            // Étape 2 : Créer un Statement
+            Statement statement = connection.createStatement();
+
+            // Exécution de la requête
+            ResultSet resultSet = statement.executeQuery(requete);
+
+            // Parcourir les résultats
+            while (resultSet.next()) {
+                HashMap<String, String> ligne = new HashMap<>();
+
+                for (String attribut : attributs) {
+                    ligne.put(attribut, resultSet.getString(attribut)); // Récupération des valeurs
                 }
 
-            } else {
-                stmt.executeUpdate(requete, Statement.RETURN_GENERATED_KEYS);
-                try (ResultSet keys = stmt.getGeneratedKeys()) {
-                    String keyName = attributs.isEmpty()
-                            ? "generated_key"
-                            : attributs.get(0);
-                    if (keys.next()) {
-                        HashMap<String,String> ligne = new HashMap<>();
-                        ligne.put(keyName, keys.getString(1));
-                        result.add(ligne);
-                    }
-                }
+                infos.add(ligne); // Ajouter la ligne complète à la liste
             }
+
+            // Fermer les ressources
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        return result;
+        return infos;
     }
+
 }

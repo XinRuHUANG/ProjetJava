@@ -1,5 +1,6 @@
 package main.controller;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,9 +9,11 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import main.*;
+import main.backend.fonctions.*;
+import main.backend.fonctions.Main;
+import main.backend.fonctions.Depot;
 import main.util.DateUtil;
-import main.Depot.*;
+import main.backend.fonctions.Depot.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,10 +28,6 @@ public class HistoriqueDepotController {
     private TableColumn<Depot, LocalDate> dateColumn;
     @FXML
     private TableColumn<Depot, LocalTime> heureColumn;
-    @FXML
-    private TableColumn<Depot, String> typeColumn;
-    @FXML
-    private TableColumn<Depot, Number> poidsColumn;
     @FXML
     private TableColumn<Depot, Number> pointsColumn;
 
@@ -50,12 +49,10 @@ public class HistoriqueDepotController {
     @FXML
     private void initialize() {
         // Initialize the person table with the two columns.
-        idColumn.setCellValueFactory((cellData -> cellData.getValue().idProperty().asObject()));
-        dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-        heureColumn.setCellValueFactory(cellData -> cellData.getValue().heureProperty());
-        typeColumn.setCellValueFactory(cellData -> cellData.getValue().typeProperty());
-        poidsColumn.setCellValueFactory(cellData -> cellData.getValue().pointsProperty());
-        pointsColumn.setCellValueFactory(cellData -> cellData.getValue().pointsProperty());
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("identifiantDepot"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        heureColumn.setCellValueFactory(new PropertyValueFactory<>("heure"));
+        pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
 
         // Formatage de la date (optionnel)
         dateColumn.setCellFactory(column -> new TableCell<Depot, LocalDate>() {
@@ -63,15 +60,6 @@ public class HistoriqueDepotController {
             protected void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
                 setText(empty || date == null ? null : DateUtil.format(date));
-            }
-        });
-
-        // Formatage des nombres
-        poidsColumn.setCellFactory(column -> new TableCell<Depot, Number>() {
-            @Override
-            protected void updateItem(Number poids, boolean empty) {
-                super.updateItem(poids, empty);
-                setText(empty || poids == null ? "" : String.format("%.2f kg", poids.floatValue()));
             }
         });
 
