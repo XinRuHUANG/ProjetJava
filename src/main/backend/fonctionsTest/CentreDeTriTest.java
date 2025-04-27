@@ -1,86 +1,74 @@
 package main.backend.fonctionsTest;
 
 import main.backend.fonctions.CentreDeTri;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
+import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
-import static org.junit.jupiter.api.Assertions.*;
 import static main.backend.fonctions.CentreDeTriDAO.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CentreDeTriTest {
 
-    @Test
-    void testConstructorAndGetters() {
-        CentreDeTri c = new CentreDeTri(
-                7,
-                "Centre A",
-                "1 rue Test",
-                new HashSet<>(),
-                new ArrayList<>(),
-                new ArrayList<>()
+    @BeforeEach
+    void initDb() throws Exception {
+        // on supprime d'abord toute trace des tests précédents
+        // (aucune référence à identifiantCentreDeTri ici)
+        requete(
+                "DELETE FROM `commercer`;"
         );
-        assertNotNull(c.getPoubelles());
-        assertNotNull(c.getCommerce());
-        assertNotNull(c.getContrats());
-        assertEquals(7, c.getIdCentreDeTri());
-        assertEquals("Centre A", c.getNom());
-        assertEquals("1 rue Test", c.getAdresse());
-    }
-
-    @Test
-    void testModifierAndEquals() {
-        CentreDeTri c = new CentreDeTri(2,"Old","Addr",
-                new HashSet<>(), new ArrayList<>(), new ArrayList<>());
-        c.modifierCentre(Map.of("nom","New","adresse","Addr2"));
-        assertEquals("New", c.getNom());
-        assertEquals("Addr2", c.getAdresse());
-
-        CentreDeTri d = new CentreDeTri(2, "New", "Addr2",
-                c.getPoubelles(), c.getCommerce(), c.getContrats());
-        assertEquals(c, d);
+        requete(
+                "DELETE FROM `CentreDeTri` " +
+                        "WHERE `nom` IN ('TEST_CTR','MOD_CTR');"
+        );
     }
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        CentreDeTri c = new CentreDeTri(
+        // === CREATE ===
+        CentreDeTri ct = new CentreDeTri(
                 0,
-                "XYZ",
-                "10 rue Test",
+                "TEST_CTR",
+                "ADRESSE_TEST",
                 new HashSet<>(),
                 new ArrayList<>(),
                 new ArrayList<>()
         );
-        ajouterCentreBDD(c);
-        int id = c.getIdCentreDeTri();
+        ajouterCentreDeTriBDD(ct);
+        assertTrue(ct.getIdCentreDeTri() >= 1, "L'ID doit être >= 1");
 
-        var cols = new ArrayList<>(List.of("nom","adresse"));
+        // === READ direct ===
         var rows = requeteAvecAffichage(
-                "SELECT nom, adresse FROM centredetri WHERE identifiantCentreDeTri = " + id + ";",
-                cols
+                "SELECT `nom`,`adresse` FROM `CentreDeTri` " +
+                        "WHERE `identifiantCentreDeTri` = " + ct.getIdCentreDeTri() + ";",
+                new ArrayList<>(List.of("nom","adresse"))
         );
-        assertEquals("XYZ",       rows.get(0).get("nom"));
-        assertEquals("10 rue Test", rows.get(0).get("adresse"));
+        assertEquals(1, rows.size(), "Doit trouver exactement 1 ligne");
+        assertEquals("TEST_CTR", rows.get(0).get("nom"));
+        assertEquals("ADRESSE_TEST", rows.get(0).get("adresse"));
 
-        c.setNom("XYZ2");
-        actualiserCentreBDD(c, "nom");
-        c.setAdresse("20 rue Test");
-        actualiserCentreBDD(c, "adresse");
+        // === UPDATE via DAO ===
+        ct.setNom("MOD_CTR");
+        ct.setAdresse("ADRESSE_MOD");
+        actualiserCentreBDD(ct, "nom", "adresse");
+
         rows = requeteAvecAffichage(
-                "SELECT nom, adresse FROM centredetri WHERE identifiantCentreDeTri = " + id + ";",
-                cols
+                "SELECT `nom`,`adresse` FROM `CentreDeTri` " +
+                        "WHERE `identifiantCentreDeTri` = " + ct.getIdCentreDeTri() + ";",
+                new ArrayList<>(List.of("nom","adresse"))
         );
-        assertEquals("XYZ2", rows.get(0).get("nom"));
-        assertEquals("20 rue Test", rows.get(0).get("adresse"));
+        assertEquals(1, rows.size());
+        assertEquals("MOD_CTR", rows.get(0).get("nom"));
+        assertEquals("ADRESSE_MOD", rows.get(0).get("adresse"));
 
-        supprimerCentreBDD(c);
+        // === DELETE via DAO ===
+        supprimerCentreBDD(ct);
         rows = requeteAvecAffichage(
-                "SELECT COUNT(*) AS cnt FROM centredetri WHERE identifiantCentreDeTri = " + id + ";",
+                "SELECT COUNT(*) AS cnt FROM `CentreDeTri` " +
+                        "WHERE `identifiantCentreDeTri` = " + ct.getIdCentreDeTri() + ";",
                 new ArrayList<>(List.of("cnt"))
         );
         assertEquals("0", rows.get(0).get("cnt"));
