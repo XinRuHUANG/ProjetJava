@@ -3,6 +3,7 @@ package main.backend.fonctions;
 
 import main.outils.connexionSQL;
 
+import java.sql.*;
 import java.util.*;
 
 import static main.outils.connexionSQL.requete;
@@ -10,19 +11,29 @@ import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class UtilisateurDAO {
     public static void ajouterUtilisateurBDD(Utilisateur u) throws Exception {
-        requete(
-                "INSERT INTO utilisateur (nom, prenom, pointsFidelite) VALUES ('"
-                        + u.getNom() + "', '"
-                        + u.getPrenom() + "', "
-                        + u.getPointsFidelite()
-                        + ");"
-        );
-        var rows = requeteAvecAffichage(
-                "SELECT LAST_INSERT_ID() AS id;",
-                new ArrayList<>(Arrays.asList("id"))
-        );
-        u.setIdUtilisateur(Integer.parseInt(rows.get(0).get("id")));
+        try (
+                Connection conn = DriverManager.getConnection(connexionSQL.url, connexionSQL.user, connexionSQL.password);
+                PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO utilisateur (nom, prenom, pointsFidelite) VALUES (?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS
+                )
+        ) {
+            stmt.setString(1, u.getNom());
+            stmt.setString(2, u.getPrenom());
+            stmt.setFloat(3, u.getPointsFidelite());
+
+            stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    u.setIdUtilisateur(generatedKeys.getInt(1));
+                } else {
+                    throw new IllegalStateException("Erreur lors de la récupération de l'ID utilisateur !");
+                }
+            }
+        }
     }
+
 
     public static void actualiserUtilisateurBDD(Utilisateur u, String... champs) throws Exception {
         for (var champ : champs) {
