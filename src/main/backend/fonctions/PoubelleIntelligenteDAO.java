@@ -1,6 +1,12 @@
 // PoubelleIntelligenteDAO.java
 package main.backend.fonctions;
 
+import main.outils.connexionSQL;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,21 +16,30 @@ import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class PoubelleIntelligenteDAO {
     public static void ajouterPoubelleIntelligenteBDD(PoubelleIntelligente p) throws Exception {
-        requete(
-                "INSERT INTO poubelleintelligente (emplacement, capaciteMaximale, typeDechet, poids, identifiantCentreDeTri) VALUES ('"
-                        + p.getEmplacement() + "', "
-                        + p.getCapaciteMaximale() + ", '"
-                        + p.getType() + "', "
-                        + p.getPoids() + ", "
-                        + p.getGerer().getIdCentreDeTri()
-                        + ");"
-        );
-        var rows = requeteAvecAffichage(
-                "SELECT LAST_INSERT_ID() AS id;",
-                new ArrayList<>(Arrays.asList("id"))
-        );
-        p.setIdentifiantPoubelle(Integer.parseInt(rows.get(0).get("id")));
+        String sql = "INSERT INTO poubelleintelligente (emplacement, capaciteMaximale, typeDechet, poids) VALUES ('"
+                + p.getEmplacement() + "', "
+                + p.getCapaciteMaximale() + ", '"
+                + p.getType() + "', "
+                + p.getPoids()
+                + ");";
+
+        // Exécute l'insertion et récupère l'ID généré
+        try (
+                Connection conn = DriverManager.getConnection(
+                        connexionSQL.url, connexionSQL.user, connexionSQL.password);
+                Statement stmt = conn.createStatement()
+        ) {
+            stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    p.setIdentifiantPoubelle(rs.getInt(1));
+                } else {
+                    throw new IllegalStateException("Erreur : aucun ID généré pour la poubelle !");
+                }
+            }
+        }
     }
+
 
     public static void actualiserPoubelleIntelligenteBDD(PoubelleIntelligente p, String... champs) throws Exception {
         for (var champ : champs) {
@@ -49,48 +64,57 @@ public class PoubelleIntelligenteDAO {
 
     public static PoubelleIntelligente lirePoubelleIntelligenteBDD(int id) throws Exception {
         var rows = requeteAvecAffichage(
-                "SELECT emplacement, capaciteMaximale, typeDechet, poids, identifiantCentreDeTri FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = "
+                "SELECT emplacement, capaciteMaximale, typeDechet, poids FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = "
                         + id + ";",
-                new ArrayList<>(Arrays.asList("emplacement", "capaciteMaximale", "typeDechet", "poids", "identifiantCentreDeTri"))
+                new ArrayList<>(Arrays.asList("emplacement", "capaciteMaximale", "typeDechet", "poids"))
         );
         if (rows.isEmpty()) return null;
         var r = rows.get(0);
-        CentreDeTri ct = CentreDeTriDAO.lireCentreDeTriBDD(Integer.parseInt(r.get("identifiantCentreDeTri")));
+
         return new PoubelleIntelligente(
                 id,
                 r.get("emplacement"),
                 Float.parseFloat(r.get("capaciteMaximale")),
                 TypeDechetEnum.TypeDechet.valueOf(r.get("typeDechet")),
                 Float.parseFloat(r.get("poids")),
-                ct,
-                Set.of(), // associations à charger si nécessaire
+                null, // pas de CentreDeTri directement dans la table poubelleintelligente
+                Set.of(), // associations à charger si besoin
                 Set.of()
         );
     }
+
 
     // méthode d’association :
     public static Set<PoubelleIntelligente> lirePoubellesParCentre(int idCentre) { /*…*/ return Set.of(); }
     public static PoubelleIntelligente lirePoubelleBDD(int idPoubelle) throws Exception {
         var rows = requeteAvecAffichage(
-                "SELECT emplacement, capaciteMaximale, typeDechet, poids, identifiantCentreDeTri " +
+                "SELECT emplacement, capaciteMaximale, typeDechet, poids " +
                         "FROM poubelleintelligente " +
                         "WHERE identifiantPoubelleIntelligente = " + idPoubelle + ";",
-                new ArrayList<String>(Arrays.asList(
+                new ArrayList<>(Arrays.asList(
                         "emplacement",
                         "capaciteMaximale",
                         "typeDechet",
-                        "poids",
-                        "identifiantCentreDeTri"
+                        "poids"
                 ))
         );
+        if (rows.isEmpty()) return null;
         var row = rows.get(0);
-        String em    = row.get("emplacement");
+        String em = row.get("emplacement");
         float capMax = Float.parseFloat(row.get("capaciteMaximale"));
-        var type     = TypeDechetEnum.TypeDechet.valueOf(row.get("typeDechet"));
-        float poids  = Float.parseFloat(row.get("poids"));
-        int idCentre = Integer.parseInt(row.get("identifiantCentreDeTri"));
-        CentreDeTri ct = CentreDeTriDAO.lireCentreDeTriBDD(idCentre);
-        return new PoubelleIntelligente(idPoubelle, em, capMax, type, poids,
-                ct, new HashSet<>(), new HashSet<>());
+        var type = TypeDechetEnum.TypeDechet.valueOf(row.get("typeDechet"));
+        float poids = Float.parseFloat(row.get("poids"));
+
+        return new PoubelleIntelligente(
+                idPoubelle,
+                em,
+                capMax,
+                type,
+                poids,
+                null, // pas de CentreDeTri directement en base
+                new HashSet<>(), // Set de dépôts jetés
+                new HashSet<>()  // Set de dépôts stockés
+        );
     }
+
 }
