@@ -1,114 +1,142 @@
 package main.backend.fonctions;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
-public class CentreDeTriDAO extends CentreDeTri {
+import java.util.*;
 
-    public CentreDeTriDAO(int idCentreDeTri, String nom, String adresse, Set<PoubelleIntelligente> poubelles, List<Commerce> commerce, List<Contrat> contrats) {
-        super(idCentreDeTri, nom, adresse, poubelles, commerce, contrats);
+public class CentreDeTriDAO {
+
+    public static void ajouterCentreDeTriBDD(CentreDeTri ct) throws Exception {
+        // INSERT
+        requete(
+                "INSERT INTO `CentreDeTri` (`nom`,`adresse`) VALUES ('"
+                        + ct.getNom().replace("'", "''") + "','"
+                        + ct.getAdresse().replace("'", "''") + "');"
+        );
+        // récupérer l’ID créé
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCentreDeTri` " +
+                        "FROM `CentreDeTri` " +
+                        "WHERE `nom` = '" + ct.getNom().replace("'", "''") + "' " +
+                        "ORDER BY `identifiantCentreDeTri` DESC LIMIT 1;",
+                new ArrayList<>(List.of("identifiantCentreDeTri"))
+        );
+        int id = Integer.parseInt(rows.get(0).get("identifiantCentreDeTri"));
+        ct.setIdCentreDeTri(id);
     }
 
-    public static void ajouterCentreBDD(CentreDeTri centreDeTri) throws SQLException {
-        // Création de l'identifiant
-        String requete = "SELECT MAX(identifiantCentreDeTri) FROM centredetri;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantCentreDeTri");
+    public static CentreDeTri lireCentreDeTriBDD(int id) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `nom`,`adresse` FROM `CentreDeTri` " +
+                        "WHERE `identifiantCentreDeTri` = " + id + ";",
+                new ArrayList<>(List.of("nom","adresse"))
+        );
+        if (rows.isEmpty()) return null;
+        var r = rows.get(0);
+        String nom     = r.get("nom");
+        String adresse = r.get("adresse");
 
-        List<HashMap<String,String>> infos =
-                requeteAvecAffichage(requete, attributs);
-        String maxStr = infos.get(0).get("identifiantCentreDeTri");
-        int previousMax = (maxStr != null) ? Integer.parseInt(maxStr) : 0;
-        int id = previousMax + 1;
+        // assoc
+        Set<PoubelleIntelligente> poubelles = PoubelleIntelligenteDAO.lirePoubellesParCentre(id);
+        List<Commerce>           commerces = CommerceDAO.lireCommercesParCentre(id);
+        List<Contrat>            contrats  = ContratDAO.lireContratsParCentre(id);
 
-        // Récupération des infos
-        centreDeTri.setIdCentreDeTri(id);
-        String nom = centreDeTri.getNom();
-        String adresse = centreDeTri.getAdresse();
-        Set<PoubelleIntelligente> poubelleIntelligente = centreDeTri.getPoubelles();
-        List<Commerce> commerces = centreDeTri.getCommerce();
-        List<Contrat> contrats = centreDeTri.getContrats();
-
-        // Ajout du nouveau centre dans la table CentreDeTri
-        requete = "INSERT INTO centredetri(identifiantCentreDeTri, nom, adresse) " +
-                "VALUES (" + id + ", '" + nom + "', '" + adresse + "');";
-        requete(requete);
-
-        // Ajout des liaisons entre le centre de tri et les commerces
-        if (commerces != null && contrats != null) {
-            int n = Math.min(commerces.size(), contrats.size());
-            for (int k = 0; k < n; k++) {
-                requete = "INSERT INTO commercer(identifiantCentreDeTri, identifiantCommerce, identifiantContrat) " +
-                        "VALUES (" + id + ", " +
-                        commerces.get(k).getIdentifiantCommerce() + ", " +
-                        contrats.get(k).getIdContrat() + ");";
-                requete(requete);
-            }
-        }
-
-        // Ajout des liaisons entre les poubelles et le centre de tri
-        if (centreDeTri.getPoubelles() != null) {
-            for (PoubelleIntelligente p : centreDeTri.getPoubelles()) {
-                requete = "INSERT INTO gerer(identifiantCentreDeTri, identifiantPoubelleIntelligente) " +
-                        "VALUES (" + id + ", " + p.getIdentifiantPoubelle() + ");";
-                requete(requete);
-            }
-        }
+        return new CentreDeTri(id, nom, adresse, poubelles, commerces, contrats);
     }
 
-    public static void actualiserCentreBDD(CentreDeTri centredetri, String instruction) {
-        int identifiantCentreDeTri = centredetri.getIdCentreDeTri();
-        String requete;
-        if (instruction.equals("nom")) {
-            requete = "UPDATE centredetri SET nom = '" + centredetri.getNom() + "' " +
-                    "WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-            requete(requete);
+    public static List<CentreDeTri> lireTousCentresDeTriBDD() throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCentreDeTri` FROM `CentreDeTri`;",
+                new ArrayList<>(List.of("identifiantCentreDeTri"))
+        );
+        List<CentreDeTri> result = new ArrayList<>();
+        for (var r : rows) {
+            int id = Integer.parseInt(r.get("identifiantCentreDeTri"));
+            result.add(lireCentreDeTriBDD(id));
         }
-        if (instruction.equals("adresse")) {
-            requete = "UPDATE centredetri SET adresse = '" + centredetri.getAdresse() + "' " +
-                    "WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-            requete(requete);
-        }
-        if (instruction.equals("poubelles")) {
-            requete = "DELETE FROM gerer WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-            requete(requete);
-            Set<PoubelleIntelligente> poubelles = centredetri.getPoubelles();
-            for (PoubelleIntelligente poubelle : poubelles) {
-                int identifiantPoubelleIntelligente = poubelle.getIdentifiantPoubelle();
-                requete = "INSERT INTO gerer(identifiantCentreDeTri, identifiantPoubelleIntelligente) " +
-                        "VALUES (" + identifiantCentreDeTri + ", " + identifiantPoubelleIntelligente + ");";
-                requete(requete);
-            }
-        }
-        if (instruction.equals("commerces") || instruction.equals("contrats")) {
-            requete = "DELETE FROM commercer WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-            requete(requete);
-            List<Commerce> commerce = centredetri.getCommerce();
-            List<Contrat> contrats = centredetri.getContrats();
-            int n = commerce.size();
-            for (int k = 0; k < n; k++) {
-                int identifiantCommerce = commerce.get(k).getIdentifiantCommerce();
-                int identifiantContrat = contrats.get(k).getIdContrat();
-                requete = "INSERT INTO commercer(identifiantCentreDeTri, identifiantCommerce, identifiantContrat) " +
-                        "VALUES (" + identifiantCentreDeTri + ", " + identifiantCommerce + ", " + identifiantContrat + ");";
-                requete(requete);
-            }
-        }
+        return result;
     }
 
-    public static void supprimerCentreBDD(CentreDeTri centredetri) {
-        int identifiantCentreDeTri = centredetri.getIdCentreDeTri();
-        String requete = "DELETE FROM commercer WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-        requete(requete);
-        requete = "DELETE FROM gerer WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-        requete(requete);
-        requete = "DELETE FROM centredetri WHERE identifiantCentreDeTri = " + identifiantCentreDeTri + ";";
-        requete(requete);
+    public static void actualiserCentreBDD(CentreDeTri ct, String... cols) throws Exception {
+        if (cols.length == 0) return;
+        StringBuilder sb = new StringBuilder("UPDATE `CentreDeTri` SET ");
+        for (int i = 0; i < cols.length; i++) {
+            String c = cols[i];
+            sb.append("`").append(c).append("` = '")
+                    .append(c.equals("nom")
+                            ? ct.getNom().replace("'", "''")
+                            : ct.getAdresse().replace("'", "''"))
+                    .append("'");
+            if (i < cols.length - 1) sb.append(", ");
+        }
+        sb.append(" WHERE `identifiantCentreDeTri` = ")
+                .append(ct.getIdCentreDeTri()).append(";");
+        requete(sb.toString());
     }
+
+    public static void supprimerCentreBDD(CentreDeTri ct) throws Exception {
+        requete(
+                "DELETE FROM `CentreDeTri` " +
+                        "WHERE `identifiantCentreDeTri` = " + ct.getIdCentreDeTri() + ";"
+        );
+    }
+
+    public static Set<PoubelleIntelligente> lirePoubellesParCentre(int idCentre) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantPoubelleIntelligente` FROM `gerer` " +
+                        "WHERE `identifiantCentreDeTri` = " + idCentre + ";",
+                new ArrayList<>(List.of("identifiantPoubelleIntelligente"))
+        );
+        Set<PoubelleIntelligente> set = new HashSet<>();
+        for (var r : rows) {
+            int idP = Integer.parseInt(r.get("identifiantPoubelleIntelligente"));
+            set.add(PoubelleIntelligenteDAO.lirePoubelleBDD(idP));
+        }
+        return set;
+    }
+
+    public static List<Commerce> lireCommercesParCentre(int idCentre) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCommerce` FROM `commercer` " +
+                        "WHERE `identifiantCentreDeTri` = " + idCentre + ";",
+                new ArrayList<>(List.of("identifiantCommerce"))
+        );
+        List<Commerce> list = new ArrayList<>();
+        for (var r : rows) {
+            int idC = Integer.parseInt(r.get("identifiantCommerce"));
+            list.add(CommerceDAO.lireCommerceBDD(idC));
+        }
+        return list;
+    }
+
+    public static List<Contrat> lireContratsParCentre(int idCentre) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantContrat` FROM `commercer` " +
+                        "WHERE `identifiantCentreDeTri` = " + idCentre + ";",
+                new ArrayList<>(List.of("identifiantContrat"))
+        );
+        List<Contrat> list = new ArrayList<>();
+        for (var r : rows) {
+            int idCt = Integer.parseInt(r.get("identifiantContrat"));
+            list.add(ContratDAO.lireContratBDD(idCt));
+        }
+        return list;
+    }
+
+    public static List<CentreDeTri> lireCentresParCommerce(int idCommerce) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT `identifiantCentreDeTri` " +
+                        "FROM `commercer` " +
+                        "WHERE `identifiantCommerce` = " + idCommerce + ";",
+                new ArrayList<>(List.of("identifiantCentreDeTri"))
+        );
+        List<CentreDeTri> result = new ArrayList<>();
+        for (var r : rows) {
+            int idCt = Integer.parseInt(r.get("identifiantCentreDeTri"));
+            result.add(lireCentreDeTriBDD(idCt));
+        }
+        return result;
+    }
+
 }
