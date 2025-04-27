@@ -1,103 +1,146 @@
 package main.backend.fonctions;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
-public class PromotionDAO extends Promotion {
+import java.util.*;
+import java.time.LocalDate;
 
-    public PromotionDAO(int idPromotion, int pourcentageRemise, int pointsRequis) {
-        super(idPromotion, pourcentageRemise, pointsRequis);
+public class PromotionDAO {
+
+    /**
+     * Insère une promotion en base et récupère son ID.
+     */
+    public static void ajouterPromotionBDD(Promotion promo) throws Exception {
+        String sql = String.format(
+                "INSERT INTO promotion (pourcentageRemise, pointsRequis) VALUES (%f, %f);",
+                promo.getPourcentageRemise(),
+                promo.getPointsRequis()
+        );
+        requete(sql);
+
+        var rows = requeteAvecAffichage(
+                "SELECT identifiantPromotion AS id\n" +
+                        "  FROM promotion\n" +
+                        " ORDER BY identifiantPromotion DESC\n" +
+                        " LIMIT 1;",
+                new ArrayList<>(Arrays.asList("id"))
+        );
+        if (rows.isEmpty()) {
+            throw new Exception("Impossible de récupérer l'ID de la promotion insérée");
+        }
+        promo.setIdPromotion(Integer.parseInt(rows.get(0).get("id")));
     }
 
-    public static void ajouterPromotionBDD(Promotion promotion) throws SQLException {
-        String requete = "SELECT MAX(identifiantPromotion) FROM promotion;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantPromotion");
+    /**
+     * Lit une promotion complète (avec catégorie, contrat et utilisateurs).
+     */
+    public static Promotion lirePromotionBDD(int id) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT pourcentageRemise, pointsRequis\n" +
+                        "  FROM promotion\n" +
+                        " WHERE identifiantPromotion = " + id + ";",
+                new ArrayList<>(Arrays.asList("pourcentageRemise", "pointsRequis"))
+        );
+        if (rows.isEmpty()) return null;
 
-        List<HashMap<String,String>> infos =
-                requeteAvecAffichage(requete, attributs);
-        String maxStr = infos.get(0).get("identifiantPromotion");
-        int previousMax = (maxStr != null) ? Integer.parseInt(maxStr) : 0;
-        int id = previousMax + 1;
+        var r = rows.get(0);
+        float pr  = Float.parseFloat(r.get("pourcentageRemise"));
+        float pts = Float.parseFloat(r.get("pointsRequis"));
 
-        promotion.setIdPromotion(id);
-        float pourcentageRemise = promotion.getPourcentageRemise();
-        float pointsRequis = promotion.getPointsRequis();
+        // 1) catégorie -> méthode dédiée
+        CategorieDeProduits cat = CategorieDeProduitsDAO.lireCategorieBDDParPromotion(id);
 
-        requete = "INSERT INTO promotion(identifiantPromotion, pourcentageRemise, pointsRequis) VALUES (" +
-                id + "," + pourcentageRemise + "," + pointsRequis + ");";
-        requete(requete);
+        // 2) contrat qui définit cette promo (s'il y en a un seul)
+        Contrat def = ContratDAO.lireContratParPromotion(id);
 
-        if (promotion.getConcerner() != null) {
-            requete = "INSERT INTO concerner(identifiantPromotion, identifiantCategorieDeProduits) VALUES (" +
-                    id + "," + promotion.getConcerner().getIdentifiantCategorie() + ");";
-            requete(requete);
+        // 3) utilisateurs qui ont utilisé cette promo
+        Set<Utilisateur> utilisateurs = UtilisateurDAO.lireUtilisateursParPromotion(id);
+
+        Promotion promo = new Promotion(id, pr, pts);
+        promo.setConcerner(cat);
+        promo.setDefinir(def);
+        promo.setUtiliser(utilisateurs);
+        return promo;
+    }
+
+    /**
+     * Lit toutes les promotions existantes.
+     */
+    public static List<Promotion> lireToutesPromotionsBDD() throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT identifiantPromotion FROM promotion;",
+                new ArrayList<>(Arrays.asList("identifiantPromotion"))
+        );
+        List<Promotion> list = new ArrayList<>();
+        for (var r : rows) {
+            int id = Integer.parseInt(r.get("identifiantPromotion"));
+            Promotion p = lirePromotionBDD(id);
+            if (p != null) list.add(p);
         }
+        return list;
+    }
 
-        if (promotion.getDefinir() != null) {
-            requete = "INSERT INTO definir(identifiantPromotion, identifiantContrat) VALUES (" +
-                    id + "," + promotion.getDefinir().getIdContrat() + ");";
-            requete(requete);
-        }
-
-        if (promotion.getUtiliser() != null) {
-            for (Utilisateur u : promotion.getUtiliser()) {
-                requete = "INSERT INTO utiliser(identifiantUtilisateur, identifiantPromotion) VALUES (" +
-                        u.getIdUtilisateur() + "," + id + ");";
-                requete(requete);
+    /**
+     * Met à jour les colonnes spécifiées.
+     */
+    public static void actualiserPromotionBDD(Promotion promo, String... cols) throws Exception {
+        if (cols.length == 0) return;
+        StringBuilder sb = new StringBuilder("UPDATE promotion SET ");
+        for (int i = 0; i < cols.length; i++) {
+            String c = cols[i];
+            sb.append(c).append(" = ");
+            switch(c) {
+                case "pourcentageRemise" -> sb.append(promo.getPourcentageRemise());
+                case "pointsRequis"      -> sb.append(promo.getPointsRequis());
+                default                  -> throw new IllegalArgumentException("Colonne inconnue: " + c);
             }
+            if (i < cols.length - 1) sb.append(", ");
         }
+        sb.append(" WHERE identifiantPromotion = ").append(promo.getIdPromotion()).append(";");
+        requete(sb.toString());
     }
 
-    public static void supprimerPromotionBDD(Promotion promotion) {
-        int id = promotion.getIdPromotion();
-        String requete = "DELETE FROM utiliser WHERE identifiantPromotion = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM definir WHERE identifiantPromotion = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM concerner WHERE identifiantPromotion = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM promotion WHERE identifiantPromotion = " + id + ";";
-        requete(requete);
+    /**
+     * Supprime une promotion.
+     */
+    public static void supprimerPromotionBDD(Promotion promo) throws Exception {
+        requete(
+                "DELETE FROM promotion\n" +
+                        " WHERE identifiantPromotion = " + promo.getIdPromotion() + ";"
+        );
     }
 
-    public static void actualiserPromotionBDD(Promotion promotion, String instruction) {
-        int identifiantPromotion = promotion.getIdPromotion();
-        String requete;
-        if (instruction.equals("pourcentageRemise")) {
-            requete = "UPDATE promotion SET pourcentageRemise = " + promotion.getPourcentageRemise() + " WHERE identifiantPromotion = " + identifiantPromotion + ";";
-            requete(requete);
+    /**
+     * Toutes les promos liées à une catégorie.
+     */
+    public static Set<Promotion> lirePromotionsParCategorie(int idCat) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT identifiantPromotion\n" +
+                        "  FROM concerner\n" +
+                        " WHERE identifiantCategorieDeProduits = " + idCat + ";",
+                new ArrayList<>(Arrays.asList("identifiantPromotion"))
+        );
+        Set<Promotion> set = new HashSet<>();
+        for (var r : rows) {
+            set.add(lirePromotionBDD(Integer.parseInt(r.get("identifiantPromotion"))));
         }
-        if (instruction.equals("pointsRequis")) {
-            requete = "UPDATE promotion SET pointsRequis = " + promotion.getPointsRequis() + " WHERE identifiantPromotion = " + identifiantPromotion + ";";
-            requete(requete);
-        }
-        if (instruction.equals("concerner")) {
-            requete = "DELETE FROM concerner WHERE identifiantPromotion = " + identifiantPromotion + ";";
-            requete(requete);
-            requete = "INSERT INTO concerner(identifiantPromotion, identifiantCategorieDeProduits) VALUES (" + identifiantPromotion + "," + promotion.getConcerner().getIdentifiantCategorie() + ");";
-            requete(requete);
-        }
-        if (instruction.equals("definir")) {
-            requete = "DELETE FROM definir WHERE identifiantPromotion = " + identifiantPromotion + ";";
-            requete(requete);
-            requete = "INSERT INTO definir(identifiantPromotion, identifiantContrat) VALUES (" + identifiantPromotion + "," + promotion.getDefinir().getIdContrat() + ");";
-            requete(requete);
-        }
-        if (instruction.equals("utiliser")) {
-            requete = "DELETE FROM utiliser WHERE identifiantPromotion = " + identifiantPromotion + ";";
-            requete(requete);
-            Set<Utilisateur> utilisateurs = promotion.getUtiliser();
-            for (Utilisateur utilisateur : utilisateurs) {
-                requete = "INSERT INTO utiliser(identifiantPromotion, identifiantUtilisateur) VALUES (" + identifiantPromotion + "," + utilisateur.getIdUtilisateur() + ");";
-                requete(requete);
-            }
-        }
+        return set;
+    }
+
+    /**
+     * La promo définie par un contrat donné.
+     */
+    public static Promotion lirePromotionParContrat(int idContrat) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT p.identifiantPromotion\n" +
+                        "  FROM promotion p\n" +
+                        "  JOIN contrat c ON p.identifiantPromotion = c.definir\n" +
+                        " WHERE c.idContrat = " + idContrat + ";",
+                new ArrayList<>(Arrays.asList("identifiantPromotion"))
+        );
+        if (rows.isEmpty()) return null;
+        int idPromo = Integer.parseInt(rows.get(0).get("identifiantPromotion"));
+        return lirePromotionBDD(idPromo);
     }
 }
