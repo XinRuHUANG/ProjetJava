@@ -1,114 +1,77 @@
+// DepotDAO.java
 package main.backend.fonctions;
 
-import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-
 import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 
 public class DepotDAO {
-    public static void creerDepotBDD(Depot depot) throws SQLException {
-        String requete = "SELECT MAX(identifiantDepot) FROM depot;";
-        ArrayList<String> attributs = new ArrayList<>();
-        attributs.add("identifiantDepot");
+    public static void ajouterDepotBDD(Depot dp) throws Exception {
+        requete("INSERT INTO depot (date,heure,points) VALUES ('" + dp.getDate() + "','" + dp.getHeure() + "'," + dp.getPoints() + ")");
+        var rows = requeteAvecAffichage("SELECT LAST_INSERT_ID() AS id", new ArrayList<>(Arrays.asList("id")));
+        dp.setIdentifiantDepot(Integer.parseInt(rows.get(0).get("id")));
+    }
 
-        List<HashMap<String,String>> infos =
-                requeteAvecAffichage(requete, attributs);
-        String maxStr = infos.get(0).get("identifiantDepot");
-        int previousMax = (maxStr != null) ? Integer.parseInt(maxStr) : 0;
-        int identifiantDepot = previousMax + 1;
-
-        depot.setIdentifiantDepot(identifiantDepot); // (Ajouté sinon problème id null dans INSERT suivants)
-
-        requete = "INSERT INTO depot(identifiantDepot, date, heure, points) VALUES (" +
-                identifiantDepot + ", '" + depot.getDate().toString() + "', '" + depot.getHeure().toString() + "', " + depot.getPoints() + ");";
-        requete(requete);
-
-        if (depot.getPosseder() != null) {
-            requete = "INSERT INTO posseder(identifiantDepot,identifiantUtilisateur) VALUES (" +
-                    identifiantDepot + "," + depot.getPosseder().getIdUtilisateur() + ");";
-            requete(requete);
-        }
-
-        Set<PoubelleIntelligente> poubelles = depot.getJeter();
-        if (poubelles != null) {
-            for (PoubelleIntelligente p : poubelles) {
-                requete = "INSERT INTO jeter(identifiantDepot, identifiantPoubelleIntelligente) VALUES (" +
-                        identifiantDepot + "," + p.getIdentifiantPoubelle() + ");";
-                requete(requete);
+    public static void actualiserDepotBDD(Depot dp, String... champs) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (String f : champs) {
+            sb.append(f).append("=");
+            switch(f) {
+                case "points": sb.append(dp.getPoints()); break;
+                default: continue;
             }
+            sb.append(",");
         }
+        String setClause = sb.substring(0,sb.length()-1);
+        requete("UPDATE depot SET " + setClause + " WHERE identifiantDepot = " + dp.getIdentifiantDepot());
     }
 
-    public static void supprimerDepotBDD(Depot depot) {
-        int id = depot.getIdentifiantDepot();
-        String requete = "DELETE FROM posseder WHERE identifiantDepot = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM contenir WHERE identifiantDepot = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM jeter WHERE identifiantDepot = " + id + ";";
-        requete(requete);
-        requete = "DELETE FROM depot WHERE identifiantDepot = " + id + ";";
-        requete(requete);
+    public static Depot lireDepotBDD(int idDepot) throws Exception {
+        var rows = requeteAvecAffichage(
+                "SELECT date, heure, points, identifiantUtilisateur, identifiantPoubelleIntelligente " +
+                        "FROM depot WHERE identifiantDepot = " + idDepot + ";",
+                new ArrayList<String>(Arrays.asList(
+                        "date",
+                        "heure",
+                        "points",
+                        "identifiantUtilisateur",
+                        "identifiantPoubelleIntelligente"
+                ))
+        );
+        var row = rows.get(0);
+        LocalDate d = LocalDate.parse(row.get("date"));
+        LocalTime h = LocalTime.parse(row.get("heure"));
+        float pts   = Float.parseFloat(row.get("points"));
+        var depot = new Depot(idDepot, d, h, pts);
+        // on peut charger utilisateur, poubelle, déchets… si besoin
+        return depot;
     }
 
-    public static void actualiserDepotBDD(Depot depot, String instruction) {
-        int identifiantDepot = depot.getIdentifiantDepot();
-        String requete;
-        if (instruction.equals("date")) {
-            requete = "UPDATE depot SET date = '" + depot.getDate() + "' WHERE identifiantDepot = " + identifiantDepot + ";";
-            requete(requete);
-        }
-        if (instruction.equals("heure")) {
-            requete = "UPDATE depot SET heure = '" + depot.getHeure() + "' WHERE identifiantDepot = " + identifiantDepot + ";";
-            requete(requete);
-        }
-        if (instruction.equals("points")) {
-            requete = "UPDATE depot SET points = " + depot.getPoints() + " WHERE identifiantDepot = " + identifiantDepot + ";";
-            requete(requete);
-        }
-        if (instruction.equals("jeter")) {
-            requete = "DELETE FROM jeter WHERE identifiantDepot = " + identifiantDepot + ";";
-            requete(requete);
-            Set<PoubelleIntelligente> jeter = depot.getJeter();
-            for (PoubelleIntelligente poubelle : jeter) {
-                int identifiantPoubelleIntelligente = poubelle.getIdentifiantPoubelle();
-                requete = "INSERT INTO jeter(identifiantDepot, identifiantPoubelleIntelligente) " +
-                        "VALUES (" + identifiantDepot + "," + identifiantPoubelleIntelligente + ");";
-                requete(requete);
-            }
-        }
-        if (instruction.equals("posseder")) {
-            requete = "DELETE FROM posseder WHERE identifiantDepot = " + identifiantDepot + ";";
-            requete(requete);
-            requete = "INSERT INTO posseder(identifiantDepot, identifiantUtilisateur) VALUES (" +
-                    identifiantDepot + "," + depot.getPosseder().getIdUtilisateur() + ");";
-            requete(requete);
-        }
-        if (instruction.equals("contenir")) {
-            requete = "DELETE FROM contenir WHERE identifiantDepot = " + identifiantDepot + ";";
-            requete(requete);
-            int n = depot.getContenir().size();
-            for (int k = 0; k < n; k++) {
-                requete = "INSERT INTO contenir(identifiantDechet, identifiantDepot) " +
-                        "VALUES (" + depot.getContenir().get(k).getIdentifiantDechet() + "," + identifiantDepot + ");";
-                requete(requete);
-            }
-        }
+    public static void supprimerDepotBDD(Depot dp) throws Exception {
+        requete("DELETE FROM depot WHERE identifiantDepot = " + dp.getIdentifiantDepot());
     }
 
-    public static void ajouterDechetDepotBDD(Depot depot, Dechet dechet) {
-        String requete = "INSERT INTO contenir(identifiantDechet, identifiantDepot) VALUES (" +
-                dechet.getIdentifiantDechet() + "," + depot.getIdentifiantDepot() + ");";
-        requete(requete);
+    // associations
+    public static List<Dechet> lireDechetsParDepot(int idDepot) throws Exception {
+        var cols = new ArrayList<>(Arrays.asList("identifiantDechet"));
+        var rows = requeteAvecAffichage("SELECT identifiantDechet FROM contenir WHERE identifiantDepot = " + idDepot, cols);
+        List<Dechet> list = new ArrayList<>();
+        for (var r : rows) list.add(DechetDAO.lireDechetBDD(Integer.parseInt(r.get("identifiantDechet"))));
+        return list;
     }
 
-    public static void supprimerDechetDepotBDD(Depot depot, Dechet dechet) {
-        String requete = "DELETE FROM contenir WHERE identifiantDepot = " +
-                depot.getIdentifiantDepot() + " AND identifiantDechet = " + dechet.getIdentifiantDechet() + ";";
-        requete(requete);
+    public static List<Utilisateur> lireUtilisateurParDepot(int idDepot) throws Exception {
+        var cols = new ArrayList<>(Arrays.asList("identifiantUtilisateur"));
+        var rows = requeteAvecAffichage("SELECT identifiantUtilisateur FROM deposer WHERE identifiantDepot = " + idDepot, cols);
+        List<Utilisateur> list = new ArrayList<>();
+        for (var r : rows) list.add(UtilisateurDAO.lireUtilisateurBDD(Integer.parseInt(r.get("identifiantUtilisateur"))));
+        return list;
     }
+
+
 }
+
