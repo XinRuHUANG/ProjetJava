@@ -1,76 +1,118 @@
 package main.backend.fonctionsTest;
 
-import main.backend.fonctions.Commerce;
-import main.backend.fonctions.CentreDeTri;
-import main.backend.fonctions.Contrat;
-import main.backend.fonctions.CategorieDeProduits;
+import main.backend.fonctions.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static main.outils.connexionSQL.requeteAvecAffichage;
+import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
-import static main.backend.fonctions.CommerceDAO.*;
 
 class CommerceTest {
 
+    @BeforeEach
+    void initDb() throws Exception {
+        requete("DELETE FROM commercer;");
+        requete("DELETE FROM proposer;");
+        requete("DELETE FROM commerce;");
+        requete("DELETE FROM centreDeTri;");
+        requete("DELETE FROM contrat;");
+        requete("DELETE FROM categoriedeproduits;");
+
+        requete(
+                "INSERT INTO centreDeTri " +
+                        "(identifiantCentreDeTri, nom, adresse) " +
+                        "VALUES (1, 'CentreStub', 'AdresseStub');"
+        );
+        requete(
+                "INSERT INTO contrat " +
+                        "(identifiantContrat, dateDebut, dateFin, clauses) " +
+                        "VALUES (1, '2020-01-01', '2020-12-31', 'ClausesStub');"
+        );
+        requete(
+                "INSERT INTO categoriedeproduits " +
+                        "(identifiantCategorieDeProduits, nom) " +
+                        "VALUES (1, 'CatStub');"
+        );
+    }
+
     @Test
     void testBasicAccessors() {
-        Commerce c = new Commerce(
-                5,
-                "Magasin",
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new HashSet<>()
+        Commerce c = new Commerce(5, "Magasin",
+                new ArrayList<>(), new ArrayList<>(), new HashSet<>()
         );
-        assertNotNull(c.getCommercer());
-        assertNotNull(c.getContrat());
-        assertNotNull(c.getProposer());
         assertEquals(5, c.getIdentifiantCommerce());
         assertEquals("Magasin", c.getNom());
         c.setNom("Boutique");
         assertEquals("Boutique", c.getNom());
+        assertNotNull(c.getCommercer());
+        assertNotNull(c.getContrat());
+        assertNotNull(c.getProposer());
     }
 
     @Test
     void testModifierEquals() {
         Commerce c = new Commerce(1, "A",
-                new ArrayList<>(), new ArrayList<>(), new HashSet<>());
-        c.modifierCommerce(Map.of("nom", "B"));
+                new ArrayList<>(), new ArrayList<>(), new HashSet<>()
+        );
+        c.modifierCommerce(
+                new java.util.HashMap<String, Object>() {{
+                    put("nom", "B");
+                }}
+        );
         assertEquals("B", c.getNom());
         Commerce d = new Commerce(1, "B",
-                c.getCommercer(), c.getContrat(), c.getProposer());
+                c.getCommercer(), c.getContrat(), c.getProposer()
+        );
         assertEquals(c, d);
     }
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        List<CentreDeTri> centres = List.of(new CentreDeTri(1,"x","x",new HashSet<>(),new ArrayList<>(),new ArrayList<>()));
-        List<Contrat>    contrats = List.of(new Contrat(1,null,null,"",null,null,null));
-        Set<CategorieDeProduits> cats = Set.of(new CategorieDeProduits(1,"x",new HashSet<>(),new HashSet<>()));
-        Commerce c = new Commerce(0, "TSTCOM", centres, contrats, cats);
-        ajouterCommerceBDD(c);
+        List<CentreDeTri> centres = new ArrayList<>(
+                Arrays.asList(
+                        new CentreDeTri(1, "CentreStub", "AdresseStub",
+                                new HashSet<>(), new ArrayList<>(), new ArrayList<>())
+                )
+        );
+        List<Contrat> contrats = new ArrayList<>(
+                Arrays.asList(
+                        new Contrat(1,
+                                java.time.LocalDate.parse("2020-01-01"),
+                                java.time.LocalDate.parse("2020-12-31"),
+                                "ClausesStub",
+                                null, null, null)
+                )
+        );
+        Set<CategorieDeProduits> cats = new HashSet<>(
+                Arrays.asList(
+                        new CategorieDeProduits(1, "CatStub", new HashSet<>(), new HashSet<>())
+                )
+        );
+
+        // Ici on crée le commerce
+        Commerce c = Commerce.ajouterCommerce("TSTCOM", centres, contrats, cats);
+
+        // CREATE
+        CommerceDAO.ajouterCommerceBDD(c);
         int id = c.getIdentifiantCommerce();
+        assertTrue(id > 0, "L'ID généré doit être > 0");
 
-        var rows = requeteAvecAffichage(
-                "SELECT nom FROM commerce WHERE identifiantCommerce = " + id + ";",
-                new ArrayList<>(List.of("nom"))
-        );
-        assertEquals("TSTCOM", rows.get(0).get("nom"));
+        // READ
+        Commerce lu = CommerceDAO.lireCommerceBDD(id);
+        assertNotNull(lu, "Le commerce doit exister");
+        assertEquals("TSTCOM", lu.getNom());
 
+        // UPDATE
         c.setNom("TST2");
-        actualiserCommerceBDD(c, "nom");
-        rows = requeteAvecAffichage(
-                "SELECT nom FROM commerce WHERE identifiantCommerce = " + id + ";",
-                new ArrayList<>(List.of("nom"))
-        );
-        assertEquals("TST2", rows.get(0).get("nom"));
+        CommerceDAO.actualiserCommerceBDD(c, "nom");
+        lu = CommerceDAO.lireCommerceBDD(id);
+        assertEquals("TST2", lu.getNom());
 
-        supprimerCommerceBDD(c);
-        rows = requeteAvecAffichage(
-                "SELECT COUNT(*) AS cnt FROM commerce WHERE identifiantCommerce = " + id + ";",
-                new ArrayList<>(List.of("cnt"))
-        );
-        assertEquals("0", rows.get(0).get("cnt"));
+        // DELETE
+        CommerceDAO.supprimerCommerceBDD(c);
+        assertNull(CommerceDAO.lireCommerceBDD(id),
+                "Après suppression, on ne doit plus lire le commerce");
     }
 }
