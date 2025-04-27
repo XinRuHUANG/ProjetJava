@@ -1,4 +1,3 @@
-// src/test/java/main/backend/fonctionsTest/PoubelleIntelligenteTest.java
 package main.backend.fonctionsTest;
 
 import main.backend.fonctions.*;
@@ -11,18 +10,28 @@ import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PoubelleIntelligenteTest {
+
     @BeforeEach
     void initDb() throws Exception {
+        // On vide proprement seulement les bonnes tables associées
         requete("DELETE FROM gerer WHERE identifiantPoubelleIntelligente = 1");
-        requete("DELETE FROM contenir WHERE identifiantPoubelleIntelligente = 1");
-        requete("DELETE FROM dechet WHERE identifiantPoubelleIntelligente = 1");
+        requete("DELETE FROM stocker WHERE identifiantPoubelleIntelligente = 1");
+        requete("DELETE FROM jeter WHERE identifiantPoubelleIntelligente = 1");
+        requete("DELETE FROM dechet WHERE identifiantDechet = 1"); // on sécurise
+        requete("DELETE FROM depot WHERE identifiantDepot = 1");    // au cas où
         requete("DELETE FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = 1");
-        requete("INSERT INTO centredetri (identifiantCentreDeTri, nom, adresse) VALUES (1,'C1','Adr1')");
+        requete("DELETE FROM centredetri WHERE identifiantCentreDeTri = 1");
+
+        // Remet un CentreDeTri pour les tests
+        requete("INSERT INTO CentreDeTri (identifiantCentreDeTri, nom, adresse) VALUES (1,'C1','Adr1')");
     }
 
     @Test
     void testBasicAccessors() {
-        PoubelleIntelligente p = new PoubelleIntelligente(5,"E",10f,TypeDechetEnum.TypeDechet.carton,2f,null,new HashSet<>(),new HashSet<>());
+        PoubelleIntelligente p = new PoubelleIntelligente(
+                5, "E", 10f, TypeDechetEnum.TypeDechet.carton, 2f,
+                null, new HashSet<>(), new HashSet<>()
+        );
         assertEquals(5, p.getIdentifiantPoubelle());
         assertEquals("E", p.getEmplacement());
         p.setEmplacement("E2");
@@ -33,7 +42,7 @@ class PoubelleIntelligenteTest {
     void testDAO_CreateReadUpdateDelete() throws Exception {
         PoubelleIntelligente p = PoubelleIntelligente.ajouterPoubelle(
                 "E", 10f, TypeDechetEnum.TypeDechet.plastique, 0f,
-                new CentreDeTri(1,"","",new HashSet<>(),new ArrayList<>(),new ArrayList<>()),
+                new CentreDeTri(1, "", "", new HashSet<>(), new ArrayList<>(), new ArrayList<>()),
                 new HashSet<>(), new HashSet<>()
         );
 
