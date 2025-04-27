@@ -3,24 +3,34 @@ package main.backend.fonctionsTest;
 import main.backend.fonctions.CategorieDeProduits;
 import main.backend.fonctions.Commerce;
 import main.backend.fonctions.Promotion;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
+import static main.outils.connexionSQL.requete;
 import static main.outils.connexionSQL.requeteAvecAffichage;
 import static org.junit.jupiter.api.Assertions.*;
 import static main.backend.fonctions.CategorieDeProduitsDAO.*;
 
 class CategorieDeProduitsTest {
 
+    @BeforeEach
+    void initDb() throws Exception {
+        // Supprime d'abord les éventuels enregistrements de test
+        requete(
+                "DELETE FROM categoriedeproduits " +
+                        "WHERE nom IN ('TEST_CAT','MOD_CAT');"
+        );
+    }
+
     @Test
     void testGettersSettersEqualsToString() {
-        Set<Promotion> promos      = new HashSet<>();
-        Set<Commerce>   commerces   = new HashSet<>();
+        var promos    = new HashSet<Promotion>();
+        var commerces = new HashSet<Commerce>();
         CategorieDeProduits c = new CategorieDeProduits(42, "Alimentaire", promos, commerces);
 
         assertNotNull(c.getConcerner());
@@ -33,6 +43,7 @@ class CategorieDeProduitsTest {
 
         CategorieDeProduits d = new CategorieDeProduits(42, "Boissons", promos, commerces);
         assertEquals(c, d);
+
         String s = c.toString();
         assertTrue(s.contains("identifiantCategorieDeProduits=42"));
         assertTrue(s.contains("nom='Boissons'"));
@@ -40,35 +51,45 @@ class CategorieDeProduitsTest {
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        CategorieDeProduits cat = new CategorieDeProduits(0,
-                "TEST_CAT",
-                new HashSet<>(),
-                new HashSet<>());
+        // === CREATE ===
+        CategorieDeProduits cat = new CategorieDeProduits(
+                0, "TEST_CAT", new HashSet<>(), new HashSet<>()
+        );
         ajouterCategorieDeProduitsBDD(cat);
-        int id = cat.getIdentifiantCategorie();
+        assertTrue(cat.getIdentifiantCategorie() >= 1,
+                "L'ID généré doit être >= 1");
 
-        // READ
-        List<HashMap<String, String>> rows = requeteAvecAffichage(
-                "SELECT nom FROM categoriedeproduits WHERE identifiantCategorieDeProduits = " + id + ";",
+        // === READ direct ===
+        var rows = requeteAvecAffichage(
+                "SELECT `nom` FROM `CategorieDeProduits` " +
+                        "WHERE `identifiantCategorieDeProduits` = "
+                        + cat.getIdentifiantCategorie() + ";",
                 new ArrayList<>(List.of("nom"))
         );
+        assertEquals(1, rows.size(), "On doit trouver exactement 1 ligne");
         assertEquals("TEST_CAT", rows.get(0).get("nom"));
 
-        // UPDATE
+        // === UPDATE via DAO ===
         cat.setNom("MOD_CAT");
-        actualiserCategorieDeProduitsBDD(cat, "nom");
+        actualiserCategorieDeproduitsBDD(cat, "nom");
         rows = requeteAvecAffichage(
-                "SELECT nom FROM categoriedeproduits WHERE identifiantCategorieDeProduits = " + id + ";",
+                "SELECT `nom` FROM `CategorieDeProduits` " +
+                        "WHERE `identifiantCategorieDeProduits` = "
+                        + cat.getIdentifiantCategorie() + ";",
                 new ArrayList<>(List.of("nom"))
         );
+        assertEquals(1, rows.size(), "On doit toujours trouver 1 ligne");
         assertEquals("MOD_CAT", rows.get(0).get("nom"));
 
-        // DELETE
-        supprimerCategorieDeProduitsBDD(cat);
+        // === DELETE via DAO ===
+        supprimerCategorieDeproduitsBDD(cat);
         rows = requeteAvecAffichage(
-                "SELECT COUNT(*) AS cnt FROM categoriedeproduits WHERE identifiantCategorieDeProduits = " + id + ";",
+                "SELECT COUNT(*) AS cnt FROM `CategorieDeProduits` " +
+                        "WHERE `identifiantCategorieDeProduits` = "
+                        + cat.getIdentifiantCategorie() + ";",
                 new ArrayList<>(List.of("cnt"))
         );
-        assertEquals("0", rows.get(0).get("cnt"));
+        assertEquals("0", rows.get(0).get("cnt"),
+                "Après suppression, le count doit valoir 0");
     }
 }
