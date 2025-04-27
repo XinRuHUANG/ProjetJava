@@ -11,17 +11,19 @@ import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UtilisateurTest {
+
     @BeforeEach
     void initDb() throws Exception {
-        requete("DELETE FROM utiliser     WHERE identifiantPromotion = 1");
-        requete("DELETE FROM depot       WHERE identifiantDepot = 1");
-        requete("DELETE FROM utilisateur WHERE identifiantUtilisateur = 1");
-        requete("INSERT INTO promotion     (identifiantPromotion, pourcentageRemise, pointsRequis) VALUES (1,0,0)");
+        // Supprimer correctement toutes les données qui pourraient bloquer
+        requete("DELETE FROM utiliser WHERE identifiantPromotion = 1;");
+        requete("DELETE FROM depot WHERE identifiantDepot = 1;");
+        requete("DELETE FROM utilisateur WHERE identifiantUtilisateur = 1;");
+        requete("DELETE FROM promotion WHERE identifiantPromotion = 1;");
     }
 
     @Test
     void testBasicAccessors() {
-        Utilisateur u = new Utilisateur(5,"N","P", 4f);
+        Utilisateur u = new Utilisateur(5, "N", "P", 4f);
         assertEquals(5, u.getIdUtilisateur());
         assertEquals("N", u.getNom());
         u.setPrenom("X");
@@ -30,7 +32,8 @@ class UtilisateurTest {
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        Utilisateur u = Utilisateur.ajouterUtilisateur("N","P",2f);
+        // Créer un nouvel utilisateur
+        Utilisateur u = Utilisateur.ajouterUtilisateur("N", "P", 2f);
 
         // CREATE
         UtilisateurDAO.ajouterUtilisateurBDD(u);
