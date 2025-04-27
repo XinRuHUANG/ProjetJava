@@ -1,24 +1,31 @@
-// src/test/java/main/backend/fonctionsTest/DechetTest.java
 package main.backend.fonctionsTest;
 
 import main.backend.fonctions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DechetTest {
+
     @BeforeEach
     void initDb() throws Exception {
-        requete("DELETE FROM contenir WHERE identifiantDechet = 1");
-        requete("DELETE FROM dechet WHERE identifiantDechet = 1");
-        requete("DELETE FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = 1");
-        requete("DELETE FROM depot WHERE identifiantDepot = 1");
-        requete("INSERT INTO depot  (identifiantDepot, date, heure, points) VALUES (1,'2025-01-01','12:00:00',0)");
-        requete("INSERT INTO poubelleintelligente (identifiantPoubelleIntelligente, emplacement, capaciteMaximale, typeDechet, poids, identifiantCentreDeTri) VALUES (1,'E',10,'plastique',0,1)");
+        // Supprimer uniquement les données utilisées, sans vider toute la table
+        requete("DELETE FROM contenir WHERE identifiantDepot = 1;");
+        requete("DELETE FROM jeter WHERE identifiantPoubelleIntelligente = 1 AND identifiantDechet = 1;");
+        requete("DELETE FROM dechet WHERE identifiantDechet = 1;");
+        requete("DELETE FROM poubelleintelligente WHERE identifiantPoubelleIntelligente = 1;");
+        requete("DELETE FROM depot WHERE identifiantDepot = 1;");
+
+        // Ajouter uniquement ce qui est nécessaire au test
+        requete("INSERT INTO depot (identifiantDepot, date, heure, points) VALUES (1,'2025-01-01','12:00:00',0);");
+        requete("INSERT INTO poubelleintelligente (identifiantPoubelleIntelligente, emplacement, capaciteMaximale, typeDechet, poids) " +
+                "VALUES (1,'E',10,'plastique',0);");
     }
 
     @Test
@@ -41,11 +48,23 @@ class DechetTest {
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        Dechet d = Dechet.ajouterDechet(
+        // Crée une poubelle minimale (le CentreDeTri est null ici car non lié directement dans la table)
+        PoubelleIntelligente poubelle = new PoubelleIntelligente(
+                1,
+                "E",
+                10f,
                 TypeDechetEnum.TypeDechet.plastique,
-                new Depot(1,null,null,0f),
-                new PoubelleIntelligente(1,"",10f,TypeDechetEnum.TypeDechet.plastique,0f,null,new HashSet<>(),new HashSet<>())
+                0f,
+                null, // pas de centre directement en BDD
+                new HashSet<>(),
+                new HashSet<>()
         );
+
+        // Crée un dépôt fictif minimal
+        Depot depot = new Depot(1, LocalDate.of(2025, 1, 1), LocalTime.of(12, 0), 0f);
+
+        // Ajoute un déchet
+        Dechet d = Dechet.ajouterDechet(TypeDechetEnum.TypeDechet.plastique, depot, poubelle);
 
         // CREATE
         DechetDAO.ajouterDechetBDD(d);
