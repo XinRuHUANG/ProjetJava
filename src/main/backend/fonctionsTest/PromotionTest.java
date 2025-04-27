@@ -1,60 +1,58 @@
+// src/test/java/main/backend/fonctionsTest/PromotionTest.java
 package main.backend.fonctionsTest;
 
-import main.backend.fonctions.Promotion;
-import main.backend.fonctions.CategorieDeProduits;
-import main.backend.fonctions.Contrat;
-import main.backend.fonctions.Utilisateur;
+import main.backend.fonctions.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static main.outils.connexionSQL.requeteAvecAffichage;
+import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
-import static main.backend.fonctions.PromotionDAO.*;
 
 class PromotionTest {
+    @BeforeEach
+    void initDb() throws Exception {
+        requete("DELETE FROM concerner WHERE identifiantCategorieDeProduits = 1");
+        requete("DELETE FROM utiliser   WHERE identifiantPromotion = 1");
+        requete("DELETE FROM definir   WHERE identifiantPromotion = 1");
+        requete("DELETE FROM promotion WHERE identifiantPromotion = 1");
+        requete("DELETE FROM categoriedeproduits WHERE identifiantCategorieDeProduits = 1");
+        requete("DELETE FROM contrat  WHERE identifiantContrat = 1");
+        requete("INSERT INTO categoriedeproduits (identifiantCategorieDeProduits, nom) VALUES (1,'Cat1')");
+        requete("INSERT INTO contrat              (identifiantContrat,    dateDebut, dateFin, clauses, identifiantCentreDeTri, identifiantCommerce) VALUES (1,'2025-01-01','2025-12-31','',1,1)");
+    }
 
     @Test
-    void testRemiseEtPointsSetters() {
-        Promotion p = new Promotion(5, 20f, 10f);
+    void testBasicAccessors() {
+        Promotion p = new Promotion(5, 10f, 2f);
+        assertEquals(5, p.getIdPromotion());
+        assertEquals(10f, p.getPourcentageRemise());
+        p.setPourcentageRemise(20f);
         assertEquals(20f, p.getPourcentageRemise());
-        assertEquals(10f, p.getPointsRequis());
-        p.setPourcentageRemise(25f);
-        assertEquals(25f, p.getPourcentageRemise());
     }
 
     @Test
     void testDAO_CreateReadUpdateDelete() throws Exception {
-        CategorieDeProduits cat = new CategorieDeProduits(1,"x",new HashSet<>(),new HashSet<>());
-        Contrat ctr = new Contrat(1,null,null,"",null,null,null);
-        Utilisateur u = new Utilisateur(1,"x","x",0f);
+        Promotion p = Promotion.ajouterPromotion(15f, 3f);
 
-        Promotion p = new Promotion(0, 5f, 2f);
-        p.setConcerner(cat);
-        p.setDefinir(ctr);
-        p.setUtiliser(new HashSet<>(List.of(u)));
-        ajouterPromotionBDD(p);
+        // CREATE
+        PromotionDAO.ajouterPromotionBDD(p);
         int id = p.getIdPromotion();
 
-        var rows = requeteAvecAffichage(
-                "SELECT pourcentageRemise FROM promotion WHERE identifiantPromotion = " + id + ";",
-                new ArrayList<>(List.of("pourcentageRemise"))
-        );
-        assertEquals("5.0", rows.get(0).get("pourcentageRemise"));
+        // READ
+        Promotion lu = PromotionDAO.lirePromotionBDD(id);
+        assertNotNull(lu);
+        assertEquals(15f, lu.getPourcentageRemise());
 
-        p.setPourcentageRemise(8f);
-        actualiserPromotionBDD(p, "pourcentageRemise");
-        rows = requeteAvecAffichage(
-                "SELECT pourcentageRemise FROM promotion WHERE identifiantPromotion = " + id + ";",
-                new ArrayList<>(List.of("pourcentageRemise"))
-        );
-        assertEquals("8.0", rows.get(0).get("pourcentageRemise"));
+        // UPDATE
+        p.setPointsRequis(5f);
+        PromotionDAO.actualiserPromotionBDD(p, "pointsRequis");
+        lu = PromotionDAO.lirePromotionBDD(id);
+        assertEquals(5f, lu.getPointsRequis());
 
-        supprimerPromotionBDD(p);
-        rows = requeteAvecAffichage(
-                "SELECT COUNT(*) AS cnt FROM promotion WHERE identifiantPromotion = " + id + ";",
-                new ArrayList<>(List.of("cnt"))
-        );
-        assertEquals("0", rows.get(0).get("cnt"));
+        // DELETE
+        PromotionDAO.supprimerPromotionBDD(p);
+        assertNull(PromotionDAO.lirePromotionBDD(id));
     }
 }
