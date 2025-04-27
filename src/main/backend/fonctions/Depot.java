@@ -2,10 +2,7 @@ package main.backend.fonctions;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Depot {
     private int identifiantDepot;
@@ -21,6 +18,8 @@ public class Depot {
         this.date = date;
         this.heure = heure;
         this.points = points;
+        this.jeter = new HashSet<>();     // Correction importante : éviter le null
+        this.contenir = new ArrayList<>(); // Correction importante : éviter le null
     }
 
     public int getIdentifiantDepot() { return identifiantDepot; }
@@ -45,7 +44,10 @@ public class Depot {
     public void setContenir(List<Dechet> c) { this.contenir = c; }
 
     public static Depot creerDepot(Utilisateur u, List<Dechet> dechets) {
-        return new Depot(0, LocalDate.now(), LocalTime.now(), 0f);
+        Depot depot = new Depot(0, LocalDate.now(), LocalTime.now(), 0f);
+        depot.setPosseder(u);
+        depot.setContenir(dechets);
+        return depot;
     }
 
     public void modifierDepot(Map<String, Object> modifications) {
@@ -61,8 +63,9 @@ public class Depot {
             }
         }
     }
-    public void supprimerDepot(){
-        //rien
+
+    public void supprimerDepot() {
+        // rien
     }
 
     public void ajouterDechetDepot(Dechet d) {
