@@ -10,61 +10,105 @@ public class CentreDeTri {
     private String nom;
     private String adresse;
     private Set<PoubelleIntelligente> poubelles;
-    private List<Commerce> commerce;
+    private List<Commerce> commerces;
     private List<Contrat> contrats;
 
-    public CentreDeTri(int id, String nom, String adresse,
+    public CentreDeTri(int id,
+                       String nom,
+                       String adresse,
                        Set<PoubelleIntelligente> poubelles,
-                       List<Commerce> commerce,
+                       List<Commerce> commerces,
                        List<Contrat> contrats) {
         this.idCentreDeTri = id;
         this.nom = nom;
         this.adresse = adresse;
         this.poubelles = poubelles;
-        this.commerce = commerce;
+        this.commerces = commerces;
         this.contrats = contrats;
     }
 
-    public int getIdCentreDeTri() { return idCentreDeTri; }
-    public void setIdCentreDeTri(int id) { this.idCentreDeTri = id; }
-
-    public String getNom() { return nom; }
-    public void setNom(String nom) { this.nom = nom; }
-
-    public String getAdresse() { return adresse; }
-    public void setAdresse(String adresse) { this.adresse = adresse; }
-
-    public Set<PoubelleIntelligente> getPoubelles() { return poubelles; }
-    public void setPoubelles(Set<PoubelleIntelligente> poubelles) { this.poubelles = poubelles; }
-
-    public List<Commerce> getCommerce() { return commerce; }
-    public void setCommerce(List<Commerce> commerce) { this.commerce = commerce; }
-
-    public List<Contrat> getContrats() { return contrats; }
-    public void setContrats(List<Contrat> contrats) { this.contrats = contrats; }
-
-    public static CentreDeTri ajouterCentre(String nom, String adresse,
-                                            Set<PoubelleIntelligente> poubelles,
-                                            List<Commerce> commerce,
-                                            List<Contrat> contrats) {
-        return new CentreDeTri(0, nom, adresse, poubelles, commerce, contrats);
+    public int getIdCentreDeTri() {
+        return idCentreDeTri;
     }
 
+    public void setIdCentreDeTri(int idCentreDeTri) {
+        this.idCentreDeTri = idCentreDeTri;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getAdresse() {
+        return adresse;
+    }
+
+    public void setAdresse(String adresse) {
+        this.adresse = adresse;
+    }
+
+    public Set<PoubelleIntelligente> getPoubelles() {
+        return poubelles;
+    }
+
+    public void setPoubelles(Set<PoubelleIntelligente> poubelles) {
+        this.poubelles = poubelles;
+    }
+
+    public List<Commerce> getCommerces() {
+        return commerces;
+    }
+
+    public void setCommerces(List<Commerce> commerces) {
+        this.commerces = commerces;
+    }
+
+    public List<Contrat> getContrats() {
+        return contrats;
+    }
+
+    public void setContrats(List<Contrat> contrats) {
+        this.contrats = contrats;
+    }
+
+    /**
+     * Créé un nouveau CentreDeTri (à utiliser avant appel au DAO pour persistance).
+     */
+    public static CentreDeTri ajouterCentre(String nom,
+                                            String adresse,
+                                            Set<PoubelleIntelligente> poubelles,
+                                            List<Commerce> commerces,
+                                            List<Contrat> contrats) {
+        return new CentreDeTri(0, nom, adresse, poubelles, commerces, contrats);
+    }
+
+    /**
+     * Modifie les champs du CentreDeTri en mémoire.
+     * @param modifications map champ→nouvelle valeur. Clefs attendues : "nom", "adresse",
+     *                      "poubelles", "commerces", "contrats".
+     */
     public void modifierCentre(Map<String, Object> modifications) {
-        for (var e : modifications.entrySet()) {
-            switch (e.getKey()) {
-                case "nom" -> setNom((String)e.getValue());
-                case "adresse" -> setAdresse((String)e.getValue());
-                case "poubelles" -> setPoubelles((Set<PoubelleIntelligente>)e.getValue());
-                case "commerces" -> setCommerce((List<Commerce>)e.getValue());
-                case "contrats" -> setContrats((List<Contrat>)e.getValue());
-                default -> throw new IllegalArgumentException("Clé inconnue : " + e.getKey());
+        for (var entry : modifications.entrySet()) {
+            switch (entry.getKey()) {
+                case "nom" -> setNom((String) entry.getValue());
+                case "adresse" -> setAdresse((String) entry.getValue());
+                case "poubelles" -> setPoubelles((Set<PoubelleIntelligente>) entry.getValue());
+                case "commerces" -> setCommerces((List<Commerce>) entry.getValue());
+                case "contrats" -> setContrats((List<Contrat>) entry.getValue());
+                default -> throw new IllegalArgumentException("Clé inconnue : " + entry.getKey());
             }
         }
     }
 
+    /**
+     * Prépare la suppression du centre (appel au DAO uniquement).
+     */
     public void supprimerCentre() {
-        // plus d'appel DAO
+        // plus d'appel DAO automatique ici
     }
 
     @Override
@@ -76,8 +120,13 @@ public class CentreDeTri {
                 && Objects.equals(nom, that.nom)
                 && Objects.equals(adresse, that.adresse)
                 && Objects.equals(poubelles, that.poubelles)
-                && Objects.equals(commerce, that.commerce)
+                && Objects.equals(commerces, that.commerces)
                 && Objects.equals(contrats, that.contrats);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idCentreDeTri, nom, adresse, poubelles, commerces, contrats);
     }
 
     @Override
@@ -87,7 +136,7 @@ public class CentreDeTri {
                 ", nom='" + nom + '\'' +
                 ", adresse='" + adresse + '\'' +
                 ", poubelles=" + poubelles +
-                ", commerce=" + commerce +
+                ", commerces=" + commerces +
                 ", contrats=" + contrats +
                 '}';
     }
