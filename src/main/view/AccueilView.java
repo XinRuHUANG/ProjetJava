@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import main.backend.fonctions.Main;
 import main.view.ConnexionView;
 import main.view.CreerUtilisateurView;
 
@@ -23,9 +24,9 @@ public class AccueilView extends Application {
         });
 
         connexionBtn.setOnAction(e -> {
-            Stage connexionStage = new Stage();
-            new ConnexionView().start(connexionStage);
-        });
+            ConnexionView connexionView = new ConnexionView();
+            connexionView.setMainApp(mainApp);  // Transmettre la référence de Main
+            connexionView.start(primaryStage);        });
 
         VBox root = new VBox(20, creerUtilisateurBtn, connexionBtn);
         root.setStyle("-fx-alignment: center; -fx-padding: 30;");
@@ -38,4 +39,10 @@ public class AccueilView extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
+    private Main mainApp;
+    public void setMainApp(Main mainApp) {
+        this.mainApp = mainApp;
+    }
+
 }

@@ -95,20 +95,4 @@ public class DechetDAO {
         }
         return result;
     }
-
-    public boolean verifierNature(Dechet dechet) throws Exception {
-        if (dechet.getStocker() == null) {
-            throw new IllegalStateException("Déchet non associé à une poubelle !");
-        }
-
-        // Lire l'objet PoubelleIntelligente depuis son ID
-        PoubelleIntelligente poubelle = PoubelleIntelligenteDAO.lirePoubelleBDD(dechet.getStocker().getIdentifiantPoubelle());
-
-        if (poubelle == null) {
-            throw new IllegalStateException("Poubelle introuvable !");
-        }
-
-        // Comparer le type de la poubelle avec celui du déchet
-        return dechet.getType() == poubelle.getType();
-    }
 }

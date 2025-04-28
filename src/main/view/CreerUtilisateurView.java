@@ -17,7 +17,7 @@ public class CreerUtilisateurView extends Application {
 
     private static final String URL = "jdbc:mysql://localhost:3306/projetjava";  // Nom de ta base
     private static final String USER = "root"; // Ton utilisateur MySQL
-    private static final String PASSWORD = ""; // Ton mot de passe MySQL (vide si Wamp par défaut)
+    private static final String PASSWORD = "cytech0001"; // Ton mot de passe MySQL (vide si Wamp par défaut)
 
     @Override
     public void start(Stage primaryStage) {
@@ -41,7 +41,7 @@ public class CreerUtilisateurView extends Application {
             } else {
                 // Insertion dans la BDD
                 try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                    String sql = "INSERT INTO utilisateur (nom, prenom, pointsFidelite) VALUES (?, ?, 0)";
+                    String sql = "INSERT INTO Utilisateur (nom, prenom, pointsFidelite) VALUES (?, ?, 0)";
                     PreparedStatement stmt = conn.prepareStatement(sql);
                     stmt.setString(1, nom);
                     stmt.setString(2, prenom);

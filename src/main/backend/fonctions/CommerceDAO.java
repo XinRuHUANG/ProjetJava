@@ -17,7 +17,7 @@ public class CommerceDAO {
     // À adapter selon ta config MySQL
     private static final String URL = "jdbc:mysql://localhost:3306/projetjava";
     private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "cytech0001";
 
     /**
      * Crée un commerce, récupère son ID auto-généré, puis insère ses associations.
@@ -182,7 +182,7 @@ public class CommerceDAO {
                         "FROM Commerce c " +
                         "JOIN commercer cm ON c.identifiantCommerce = cm.identifiantCommerce " +
                         "WHERE cm.identifiantCentreDeTri = " + idCentre + ";",
-                new ArrayList<>(List.of("identifiantCommerce","nom"))
+                new ArrayList<>(List.of("identifiantCommerce", "nom"))
         );
         var result = new ArrayList<Commerce>();
         for (var row : rows) {

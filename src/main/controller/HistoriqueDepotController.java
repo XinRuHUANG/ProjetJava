@@ -8,9 +8,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import main.backend.fonctions.Main;
 import main.backend.fonctions.Depot;
 import main.util.DateUtil;
+import main.backend.fonctions.Utilisateur;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -87,42 +89,71 @@ public class HistoriqueDepotController {
 
     private void updateTableData() {
         try {
-            if (depotTable == null) {
-                System.err.println("Le TableView 'depotTable' est null !");
-                return;
-            }
-
+            System.out.println("Début de updateTableData"); // Debug
             if (mainApp == null) {
                 System.err.println("MainApp n'est pas initialisé");
                 return;
             }
 
             ObservableList<Depot> fullList = mainApp.getDepotData();
-            if (fullList == null || fullList.isEmpty()) {
-                System.err.println("La liste des dépôts est vide");
+            Utilisateur currentUser = mainApp.getCurrentUser();
+
+            System.out.println("Nombre total de dépôts: " + (fullList != null ? fullList.size() : "null")); // Debug
+            System.out.println("Utilisateur courant: " + (currentUser != null ? currentUser.toString() : "null"));
+
+            if (fullList == null || currentUser == null) {
+                System.err.println("Liste ou utilisateur null");
                 depotTable.setItems(FXCollections.emptyObservableList());
+                messageLabel.setText("Aucun dépôt disponible.");
+                return;
+            }
 
-                // Afficher le message si la liste est vide
-                messageLabel.setVisible(true);
+            // Filtrer les dépôts pour n'afficher que ceux de l'utilisateur actuel
+            ObservableList<Depot> filteredList = FXCollections.observableArrayList();
+            for (Depot depot : fullList) {
+                if (depot.getPosseder() != null && depot.getPosseder().equals(currentUser)) {
+                    filteredList.add(depot);
+                }
+            }
+
+            // Si aucune donnée n'a été trouvée après filtrage, afficher un message.
+            if (filteredList.isEmpty()) {
+                depotTable.setItems(FXCollections.emptyObservableList());
+                messageLabel.setText("Aucun dépôt trouvé pour cet utilisateur.");
             } else {
-                depotTable.setItems(fullList);
+                // Trier les dépôts par date (et heure si besoin) dans l'ordre décroissant
+                filteredList.sort((depot1, depot2) -> {
+                    // Comparaison des dates, puis des heures (si les dates sont identiques)
+                    int dateComparison = depot2.getDate().compareTo(depot1.getDate());
+                    if (dateComparison == 0) {
+                        return depot2.getHeure().compareTo(depot1.getHeure());
+                    }
+                    return dateComparison;
+                });
 
-                // Cacher le message si la liste contient des éléments
-                messageLabel.setVisible(false);
+                // Récupérer les 5 premiers dépôts (ou moins si moins de 5)
+                int limit = Math.min(5, filteredList.size());
+                ObservableList<Depot> limitedList = FXCollections.observableArrayList(
+                        filteredList.subList(0, limit)
+                );
+
+                // Mettre à jour le tableau avec les 5 dépôts les plus récents
+                depotTable.setItems(limitedList);
+                messageLabel.setText("Dépôts trouvés : " + limitedList.size());
             }
 
         } catch (Exception e) {
             System.err.println("Erreur critique: " + e.getMessage());
             e.printStackTrace();
             depotTable.setItems(FXCollections.emptyObservableList());
+            messageLabel.setText("Erreur lors de la récupération des dépôts.");
         }
     }
 
     @FXML
     private void handleRetourMenu() {
-        if (mainApp != null) {
-            mainApp.showAccueilView();
-        }
+        Stage currentStage = (Stage) retourMenuButton.getScene().getWindow();
+        currentStage.close();
     }
 
     @FXML
@@ -130,18 +161,17 @@ public class HistoriqueDepotController {
         if (mainApp != null) {
             ObservableList<Depot> fullList = mainApp.getDepotData();
 
-            // Créer une nouvelle fenêtre (Stage)
+            // Créer une nouvelle fenêtre pour afficher l'historique complet
             Stage newStage = new Stage();
             newStage.setTitle("Historique Complet des Dépôts");
 
-            // Créer un nouveau TableView et ses colonnes
+            // Créer un nouveau TableView pour afficher l'historique complet
             TableView<Depot> newDepotTable = new TableView<>();
             TableColumn<Depot, Integer> idColumn = new TableColumn<>("ID");
             TableColumn<Depot, LocalDate> dateColumn = new TableColumn<>("Date");
             TableColumn<Depot, LocalTime> heureColumn = new TableColumn<>("Heure");
             TableColumn<Depot, Number> pointsColumn = new TableColumn<>("Points");
 
-            // Ajouter des colonnes au TableView
             newDepotTable.getColumns().addAll(idColumn, dateColumn, heureColumn, pointsColumn);
 
             // Remplir les colonnes avec les bonnes propriétés
@@ -150,32 +180,14 @@ public class HistoriqueDepotController {
             heureColumn.setCellValueFactory(new PropertyValueFactory<>("heure"));
             pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
 
-            // Formatage de la date
-            dateColumn.setCellFactory(column -> new TableCell<Depot, LocalDate>() {
-                @Override
-                protected void updateItem(LocalDate date, boolean empty) {
-                    super.updateItem(date, empty);
-                    setText(empty || date == null ? null : DateUtil.format(date));
-                }
-            });
-
-            // Formatage des points
-            pointsColumn.setCellFactory(column -> new TableCell<Depot, Number>() {
-                @Override
-                protected void updateItem(Number points, boolean empty) {
-                    super.updateItem(points, empty);
-                    setText(empty || points == null ? "" : String.format("%.0f pts", points.floatValue()));
-                }
-            });
-
-            // Ajouter les données à ce nouveau TableView
+            // Ajouter les données au nouveau TableView
             newDepotTable.setItems(fullList);
 
-            // Créer un Layout (par exemple, un VBox) et y ajouter le TableView
+            // Créer un layout pour le nouveau TableView
             VBox vbox = new VBox();
             vbox.getChildren().add(newDepotTable);
 
-            // Créer une nouvelle Scene avec le VBox et définir cette scène pour le nouveau Stage
+            // Créer une nouvelle scène avec le VBox et définir cette scène pour le nouveau Stage
             Scene scene = new Scene(vbox);
             newStage.setScene(scene);
 
@@ -183,5 +195,4 @@ public class HistoriqueDepotController {
             newStage.show();
         }
     }
-
 }

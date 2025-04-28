@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static main.backend.fonctions.CommerceDAO.ajouterCommerceBDD;
+
 import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
 

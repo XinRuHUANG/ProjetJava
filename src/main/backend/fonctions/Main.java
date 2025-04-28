@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import main.controller.HistoriqueDepotController;
 import main.controller.RootLayoutController;
 
-import main.view.CreerUtilisateurView;
+import main.view.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class Main extends Application {
+
+    private Utilisateur currentUser;
 
     private final ObservableList<Depot> depotData = FXCollections.observableArrayList();
     private Stage primaryStage;
@@ -36,37 +38,40 @@ public class Main extends Application {
         launch(args);
     }
 
+    public Utilisateur getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(Utilisateur user) {
+        this.currentUser = user;
+    }
+
     @Override
     public void start(Stage primaryStage) {
+        if (primaryStage == null) {
+            System.err.println("Erreur : primaryStage n'a pas été initialisé correctement.");
+            return;
+        }
+
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("TriPlus - Gestion des dépôts");
 
-        // Initialisation des données exemple (optionnel)
+        // Initialisation des données exemple
         initSampleData();
 
         // Afficher l'écran d'accueil
         showAccueilView();
     }
 
+
     public void showAccueilView() {
-        VBox root = new VBox(20);
-        root.setPadding(new Insets(30));
-        root.setStyle("-fx-alignment: center;");
-
-        Label titre = new Label("Bienvenue sur TriPlus");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        Button creerUtilisateurBtn = new Button("Créer un compte utilisateur");
-        creerUtilisateurBtn.setOnAction(e -> new CreerUtilisateurView().start(new Stage()));
-
-        Button gestionDepotsBtn = new Button("Gérer les dépôts");
-        gestionDepotsBtn.setOnAction(e -> showHistoriqueDepotView());
-
-        root.getChildren().addAll(titre, creerUtilisateurBtn, gestionDepotsBtn);
-
-        Scene scene = new Scene(root, 400, 300);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        try {
+            AccueilView accueilView = new AccueilView();
+            accueilView.setMainApp(this);
+            accueilView.start(primaryStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void initRootLayout() {
@@ -87,6 +92,8 @@ public class Main extends Application {
     }
 
     private void initSampleData() {
+        Utilisateur user1 = new Utilisateur(1, "h", "xr", 100);
+
         depotData.add(new Depot(1, LocalDate.of(2025,4,25), LocalTime.of(20,19), 5.0f));
         depotData.add(new Depot(2, LocalDate.of(2025,2,25), LocalTime.of(20,19), 5.0f));
         depotData.add(new Depot(3, LocalDate.of(2025,3,25), LocalTime.of(20,19), 5.0f));
@@ -95,7 +102,7 @@ public class Main extends Application {
         depotData.add(new Depot(6, LocalDate.of(2025,9,25), LocalTime.of(20,19), 5.0f));
     }
 
-    private void showHistoriqueDepotView() {
+    public void showHistoriqueDepotView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/main/view/HistoriqueDepot.fxml"));
             Parent root = loader.load();
@@ -103,13 +110,15 @@ public class Main extends Application {
             HistoriqueDepotController controller = loader.getController();
             controller.setMainApp(this);
 
-            primaryStage.setScene(new Scene(root));
-            primaryStage.show();
+            Stage historiqueStage = new Stage();
+            historiqueStage.setScene(new Scene(root));
+            historiqueStage.show();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Erreur lors du chargement de l'interface");
         }
     }
+
 
     public void handleSaveAs() {
         FileChooser fileChooser = new FileChooser();

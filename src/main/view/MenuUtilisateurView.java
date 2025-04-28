@@ -8,7 +8,14 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import main.backend.fonctions.Main;
+import main.controller.HistoriqueDepotController.*;
+import static main.backend.fonctions.Main.*;
+
 public class MenuUtilisateurView extends Application {
+
+    private Stage stage;
+    private Main mainApp;
 
     private static String nomUtilisateur;
     private static String prenomUtilisateur;
@@ -32,6 +39,9 @@ public class MenuUtilisateurView extends Application {
         Button historiqueBtn = new Button("Voir l'historique des dépôts");
         Button promosBtn = new Button("Consulter les promotions");
 
+        // Gestionnaire d'événements pour l'historique des dépôts
+        historiqueBtn.setOnAction(e -> showHistoriqueDepot());
+
         VBox root = new VBox(15, bienvenue, deposerBtn, voirPointsBtn, historiqueBtn, promosBtn);
         root.setPadding(new Insets(20));
         root.setStyle("-fx-alignment: center;");
@@ -42,7 +52,16 @@ public class MenuUtilisateurView extends Application {
         primaryStage.show();
     }
 
+    private void showHistoriqueDepot() {
+        Main mainApp = new Main(); // Instanciation de Main, probablement déjà instancié ailleurs
+        mainApp.showHistoriqueDepotView();
+    }
+
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void setMainApp(Main mainApp) {
+        this.mainApp = mainApp;
     }
 }

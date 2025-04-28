@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import main.backend.fonctions.Main;
+import main.backend.fonctions.Utilisateur; // Ajout de l'import
 import main.view.MenuUtilisateurView;
 
 import java.sql.Connection;
@@ -19,7 +21,9 @@ public class ConnexionView extends Application {
 
     private static final String URL = "jdbc:mysql://localhost:3306/projetjava";
     private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "cytech0001";
+
+    private Main mainApp;
 
     @Override
     public void start(Stage primaryStage) {
@@ -44,19 +48,32 @@ public class ConnexionView extends Application {
                 messageErreur.setText("Veuillez remplir tous les champs.");
             } else {
                 try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                    String sql = "SELECT * FROM utilisateur WHERE nom = ? AND prenom = ?";
+                    String sql = "SELECT * FROM Utilisateur WHERE nom = ? AND prenom = ?";
                     PreparedStatement stmt = conn.prepareStatement(sql);
                     stmt.setString(1, nom);
                     stmt.setString(2, prenom);
                     ResultSet rs = stmt.executeQuery();
 
                     if (rs.next()) {
-                        // Utilisateur trouvé → Accès au menu
+                        // Création de l'objet Utilisateur avec les données de la BDD
+                        Utilisateur utilisateurConnecte = new Utilisateur(
+                                rs.getInt("id"),
+                                rs.getString("nom"),
+                                rs.getString("prenom"),
+                                rs.getInt("points")
+                        );
+
+                        // Stockage de l'utilisateur dans Main
+                        if (mainApp != null) {
+                            mainApp.setCurrentUser(utilisateurConnecte);
+                        }
+
+                        // Accès au menu
                         MenuUtilisateurView menu = new MenuUtilisateurView(nom, prenom);
+                        menu.setMainApp(mainApp); // Passage de la référence à Main
                         menu.start(new Stage());
                         primaryStage.close();
                     } else {
-                        // Utilisateur non trouvé
                         messageErreur.setText("Nom ou prénom incorrect.");
                     }
                 } catch (Exception ex) {
@@ -78,5 +95,9 @@ public class ConnexionView extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void setMainApp(Main mainApp) {
+        this.mainApp = mainApp;
     }
 }

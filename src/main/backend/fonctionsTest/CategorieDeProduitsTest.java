@@ -22,7 +22,7 @@ class CategorieDeProduitsTest {
     void initDb() throws Exception {
         // Supprime d'abord les éventuels enregistrements de test
         requete(
-                "DELETE FROM categoriedeproduits " +
+                "DELETE FROM CategorieDeProduits " +
                         "WHERE nom IN ('TEST_CAT','MOD_CAT');"
         );
     }
