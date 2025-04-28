@@ -89,64 +89,45 @@ public class HistoriqueDepotController {
 
     private void updateTableData() {
         try {
-            System.out.println("Début de updateTableData"); // Debug
-            if (mainApp == null) {
-                System.err.println("MainApp n'est pas initialisé");
-                return;
-            }
-
-            ObservableList<Depot> fullList = mainApp.getDepotData();
-            Utilisateur currentUser = mainApp.getCurrentUser();
-
-            System.out.println("Nombre total de dépôts: " + (fullList != null ? fullList.size() : "null")); // Debug
-            System.out.println("Utilisateur courant: " + (currentUser != null ? currentUser.toString() : "null"));
-
-            if (fullList == null || currentUser == null) {
-                System.err.println("Liste ou utilisateur null");
+            if (mainApp == null || mainApp.getCurrentUser() == null) {
+                System.err.println("MainApp ou utilisateur non initialisé");
                 depotTable.setItems(FXCollections.emptyObservableList());
-                messageLabel.setText("Aucun dépôt disponible.");
+                messageLabel.setText("Veuillez vous connecter");
                 return;
             }
 
-            // Filtrer les dépôts pour n'afficher que ceux de l'utilisateur actuel
-            ObservableList<Depot> filteredList = FXCollections.observableArrayList();
-            for (Depot depot : fullList) {
-                if (depot.getPosseder() != null && depot.getPosseder().equals(currentUser)) {
-                    filteredList.add(depot);
+            // Récupération des dépôts depuis la BDD
+            ObservableList<Depot> userDepots = mainApp.getDepotsByUser(mainApp.getCurrentUser());
+
+            if (userDepots.isEmpty()) {
+                depotTable.setItems(FXCollections.emptyObservableList());
+                messageLabel.setText("Aucun dépôt trouvé");
+                return;
+            }
+
+            // Tri par date/heure décroissante
+            userDepots.sort((d1, d2) -> {
+                int dateCompare = d2.getDate().compareTo(d1.getDate());
+                if (dateCompare == 0) {
+                    return d2.getHeure().compareTo(d1.getHeure());
                 }
-            }
+                return dateCompare;
+            });
 
-            // Si aucune donnée n'a été trouvée après filtrage, afficher un message.
-            if (filteredList.isEmpty()) {
-                depotTable.setItems(FXCollections.emptyObservableList());
-                messageLabel.setText("Aucun dépôt trouvé pour cet utilisateur.");
-            } else {
-                // Trier les dépôts par date (et heure si besoin) dans l'ordre décroissant
-                filteredList.sort((depot1, depot2) -> {
-                    // Comparaison des dates, puis des heures (si les dates sont identiques)
-                    int dateComparison = depot2.getDate().compareTo(depot1.getDate());
-                    if (dateComparison == 0) {
-                        return depot2.getHeure().compareTo(depot1.getHeure());
-                    }
-                    return dateComparison;
-                });
+            // Limite à 5 résultats pour l'affichage initial
+            int limit = Math.min(5, userDepots.size());
+            ObservableList<Depot> limitedList = FXCollections.observableArrayList(
+                    userDepots.subList(0, limit)
+            );
 
-                // Récupérer les 5 premiers dépôts (ou moins si moins de 5)
-                int limit = Math.min(5, filteredList.size());
-                ObservableList<Depot> limitedList = FXCollections.observableArrayList(
-                        filteredList.subList(0, limit)
-                );
-
-                // Mettre à jour le tableau avec les 5 dépôts les plus récents
-                depotTable.setItems(limitedList);
-                messageLabel.setText("Dépôts trouvés : " + limitedList.size());
-            }
+            depotTable.setItems(limitedList);
+            messageLabel.setText("Dépôts trouvés: " + limitedList.size());
 
         } catch (Exception e) {
-            System.err.println("Erreur critique: " + e.getMessage());
+            System.err.println("Erreur: " + e.getMessage());
             e.printStackTrace();
             depotTable.setItems(FXCollections.emptyObservableList());
-            messageLabel.setText("Erreur lors de la récupération des dépôts.");
+            messageLabel.setText("Erreur de chargement");
         }
     }
 
@@ -159,7 +140,7 @@ public class HistoriqueDepotController {
     @FXML
     private void handleAfficherPlus() {
         if (mainApp != null) {
-            ObservableList<Depot> fullList = mainApp.getDepotData();
+            ObservableList<Depot> fullList = mainApp.getDepotsByUser(mainApp.getCurrentUser());
 
             // Créer une nouvelle fenêtre pour afficher l'historique complet
             Stage newStage = new Stage();

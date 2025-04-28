@@ -53,8 +53,11 @@ public class MenuUtilisateurView extends Application {
     }
 
     private void showHistoriqueDepot() {
-        Main mainApp = new Main(); // Instanciation de Main, probablement déjà instancié ailleurs
-        mainApp.showHistoriqueDepotView();
+        if(mainApp != null) {
+            mainApp.showHistoriqueDepotView();
+        } else {
+            System.err.println("Erreur: mainApp est null");
+        }
     }
 
     public static void main(String[] args) {
