@@ -63,15 +63,15 @@ public class CentreDeTriDAO {
         StringBuilder sb = new StringBuilder("UPDATE `CentreDeTri` SET ");
         for (int i = 0; i < cols.length; i++) {
             String c = cols[i];
-            sb.append("`").append(c).append("` = '")
-                    .append(c.equals("nom")
-                            ? ct.getNom().replace("'", "''")
-                            : ct.getAdresse().replace("'", "''"))
-                    .append("'");
+            sb.append("`").append(c).append("` = ");
+            switch (c) {
+                case "nom" -> sb.append("'").append(ct.getNom().replace("'", "''")).append("'");
+                case "adresse" -> sb.append("'").append(ct.getAdresse().replace("'", "''")).append("'");
+                default -> throw new IllegalArgumentException("Colonne inconnue : " + c);
+            }
             if (i < cols.length - 1) sb.append(", ");
         }
-        sb.append(" WHERE `identifiantCentreDeTri` = ")
-                .append(ct.getIdCentreDeTri()).append(";");
+        sb.append(" WHERE `identifiantCentreDeTri` = ").append(ct.getIdCentreDeTri()).append(";");
         requete(sb.toString());
     }
 
