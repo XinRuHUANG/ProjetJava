@@ -1,4 +1,4 @@
-package Main;
+package main.view;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -9,7 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 // Import pour ouvrir CreerUtilisateurView
-import Main.CreerUtilisateurView;
+import main.view.CreerUtilisateurView;
 
 public class AccueilView extends Application {
 
