@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.PromotionController" spacing="10">
+    <Button text="Voir les promotions"/>
+    <Button text="Ajouter une promotion"/>
+</VBox>
