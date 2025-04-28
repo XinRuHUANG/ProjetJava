@@ -1,4 +1,4 @@
-package main.view;
+package Main;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 
 public class CreerUtilisateurView extends Application {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/projetjava";  // Nom de ta base
+    private static final String URL = "jdbc:mysql://localhost:3306/projet_java";  // Nom de ta base
     private static final String USER = "root"; // Ton utilisateur MySQL
     private static final String PASSWORD = ""; // Ton mot de passe MySQL (vide si Wamp par défaut)
 
