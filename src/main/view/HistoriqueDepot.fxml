@@ -22,6 +22,7 @@
         <ButtonBar layoutX="47.0" layoutY="238.0" prefHeight="40.0" prefWidth="200.0">
             <buttons>
                 <Button fx:id="afficherPlusButton" mnemonicParsing="false" onAction="#handleAfficherPlus" text="Afficher plus" />
+                <Button fx:id="exporterButton" mnemonicParsing="false" onAction="#handleExporterCSV" text="Exporter CSV" />
                 <Button fx:id="retourMenuButton" mnemonicParsing="false" onAction="#handleRetourMenu" prefHeight="26.0" prefWidth="196.0" text="Retour au menu" />
             </buttons>
         </ButtonBar>

@@ -36,7 +36,7 @@ public class Main extends Application {
 
     private static final String URL = "jdbc:mysql://localhost:3306/projetjava";
     private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "cytech0001";
 
     public static void main(String[] args) {
         launch(args);

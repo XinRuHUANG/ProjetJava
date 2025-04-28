@@ -7,6 +7,7 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import main.backend.fonctions.Main;
@@ -14,8 +15,12 @@ import main.backend.fonctions.Depot;
 import main.util.DateUtil;
 import main.backend.fonctions.Utilisateur;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class HistoriqueDepotController {
 
@@ -35,6 +40,8 @@ public class HistoriqueDepotController {
 
     @FXML
     private Button retourMenuButton;
+    @FXML
+    private Button exporterButton;
     @FXML
     private Button afficherPlusButton;
 
@@ -163,6 +170,64 @@ public class HistoriqueDepotController {
 
             // Afficher la nouvelle fenêtre
             newStage.show();
+        }
+    }
+
+    @FXML
+    private void handleExporterCSV() {
+        if (mainApp == null || mainApp.getCurrentUser() == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Avertissement");
+            alert.setHeaderText(null);
+            alert.setContentText("Aucun utilisateur connecté");
+            alert.showAndWait();
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exporter l'historique complet");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers CSV", "*.csv"));
+        fileChooser.setInitialFileName("historique_complet_depots.csv");
+
+        File file = fileChooser.showSaveDialog(depotTable.getScene().getWindow());
+
+        if (file != null) {
+            try (PrintWriter writer = new PrintWriter(file)) {
+                // En-tête CSV
+                writer.println("ID,Date,Heure,Points");
+
+                // Récupère TOUS les dépôts de l'utilisateur depuis Main
+                ObservableList<Depot> tousLesDepots = mainApp.getDepotsByUser(mainApp.getCurrentUser());
+
+                // Formatage
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+                // Écriture des données
+                for (Depot depot : tousLesDepots) {
+                    writer.println(
+                            depot.getIdentifiantDepot() + "," +
+                                    depot.getDate().format(dateFormatter) + "," +
+                                    depot.getHeure().format(timeFormatter) + "," +
+                                    String.format("%.2f", depot.getPoints())
+                    );
+                }
+
+                // Confirmation
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Export réussi");
+                alert.setHeaderText(null);
+                alert.setContentText(tousLesDepots.size() + " dépôts exportés avec succès !");
+                alert.showAndWait();
+
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Erreur");
+                alert.setHeaderText("Échec de l'export");
+                alert.setContentText("Une erreur est survenue :\n" + e.getMessage());
+                alert.showAndWait();
+            }
         }
     }
 }
