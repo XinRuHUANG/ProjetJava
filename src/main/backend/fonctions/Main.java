@@ -95,7 +95,14 @@ public class Main extends Application {
         if (user == null) return userDepots;
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String sql = "SELECT * FROM Depot WHERE idUtilisateur = ?";
+            String sql = """
+            SELECT d.identifiantDepot, d.date, d.heure, d.points 
+            FROM Depot d
+            JOIN posseder p ON d.identifiantDepot = p.identifiantDepot
+            WHERE p.identifiantUtilisateur = ?
+            ORDER BY d.date DESC, d.heure DESC
+        """;
+
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user.getIdentifiantUtilisateur());
 
@@ -103,20 +110,22 @@ public class Main extends Application {
 
             while (rs.next()) {
                 Depot depot = new Depot(
-                        rs.getInt("id"),
+                        rs.getInt("identifiantDepot"),
                         rs.getDate("date").toLocalDate(),
                         rs.getTime("heure").toLocalTime(),
                         rs.getFloat("points")
                 );
-                depot.setPosseder(user); // Lie le dépôt à l'utilisateur
+                depot.setPosseder(user);
                 userDepots.add(depot);
             }
         } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des dépôts:");
             e.printStackTrace();
         }
 
         return userDepots;
     }
+
 
     public void initRootLayout() {
         try {

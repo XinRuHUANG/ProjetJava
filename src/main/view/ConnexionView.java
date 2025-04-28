@@ -57,10 +57,10 @@ public class ConnexionView extends Application {
                     if (rs.next()) {
                         // Création de l'objet Utilisateur avec les données de la BDD
                         Utilisateur utilisateurConnecte = new Utilisateur(
-                                rs.getInt("id"),
+                                rs.getInt("identifiantUtilisateur"),
                                 rs.getString("nom"),
                                 rs.getString("prenom"),
-                                rs.getInt("points")
+                                rs.getInt("pointsFidelite")
                         );
 
                         // Stockage de l'utilisateur dans Main

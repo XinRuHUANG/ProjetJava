@@ -88,6 +88,8 @@ public class HistoriqueDepotController {
     }
 
     private void updateTableData() {
+        System.out.println("Début de updateTableData");
+
         try {
             if (mainApp == null || mainApp.getCurrentUser() == null) {
                 System.err.println("MainApp ou utilisateur non initialisé");
@@ -96,35 +98,22 @@ public class HistoriqueDepotController {
                 return;
             }
 
-            // Récupération des dépôts depuis la BDD
+            System.out.println("Récupération des dépôts pour user ID: " + mainApp.getCurrentUser().getIdentifiantUtilisateur());
             ObservableList<Depot> userDepots = mainApp.getDepotsByUser(mainApp.getCurrentUser());
+            System.out.println("Nombre de dépôts trouvés: " + userDepots.size());
 
             if (userDepots.isEmpty()) {
+                System.out.println("Aucun dépôt trouvé pour cet utilisateur");
                 depotTable.setItems(FXCollections.emptyObservableList());
                 messageLabel.setText("Aucun dépôt trouvé");
                 return;
             }
 
-            // Tri par date/heure décroissante
-            userDepots.sort((d1, d2) -> {
-                int dateCompare = d2.getDate().compareTo(d1.getDate());
-                if (dateCompare == 0) {
-                    return d2.getHeure().compareTo(d1.getHeure());
-                }
-                return dateCompare;
-            });
-
-            // Limite à 5 résultats pour l'affichage initial
-            int limit = Math.min(5, userDepots.size());
-            ObservableList<Depot> limitedList = FXCollections.observableArrayList(
-                    userDepots.subList(0, limit)
-            );
-
-            depotTable.setItems(limitedList);
-            messageLabel.setText("Dépôts trouvés: " + limitedList.size());
+            depotTable.setItems(userDepots);
+            messageLabel.setText("Dépôts trouvés: " + userDepots.size());
 
         } catch (Exception e) {
-            System.err.println("Erreur: " + e.getMessage());
+            System.err.println("Erreur lors du chargement des dépôts:");
             e.printStackTrace();
             depotTable.setItems(FXCollections.emptyObservableList());
             messageLabel.setText("Erreur de chargement");
