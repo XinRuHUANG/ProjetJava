@@ -42,17 +42,24 @@ public class PoubelleIntelligenteDAO {
 
 
     public static void actualiserPoubelleIntelligenteBDD(PoubelleIntelligente p, String... champs) throws Exception {
-        for (var champ : champs) {
+        if (champs.length == 0) return;
+        StringBuilder sb = new StringBuilder("UPDATE poubelleintelligente SET ");
+        for (int i = 0; i < champs.length; i++) {
+            String champ = champs[i];
+            sb.append(champ).append(" = ");
             switch (champ) {
-                case "poids" -> requete(
-                        "UPDATE poubelleintelligente SET poids = "
-                                + p.getPoids()
-                                + " WHERE identifiantPoubelleIntelligente = " + p.getIdentifiantPoubelle() + ";"
-                );
-                default -> throw new IllegalArgumentException("Champ inconnu : " + champ);
+                case "emplacement" -> sb.append("'").append(p.getEmplacement().replace("'", "''")).append("'");
+                case "capaciteMaximale" -> sb.append(p.getCapaciteMaximale());
+                case "typeDechet" -> sb.append("'").append(p.getType().name()).append("'");
+                case "poids" -> sb.append(p.getPoids());
+                default -> throw new IllegalArgumentException("Champ inconnu pour la Poubelle : " + champ);
             }
+            if (i < champs.length - 1) sb.append(", ");
         }
+        sb.append(" WHERE identifiantPoubelleIntelligente = ").append(p.getIdentifiantPoubelle()).append(";");
+        requete(sb.toString());
     }
+
 
     public static void supprimerPoubelleIntelligenteBDD(PoubelleIntelligente p) throws Exception {
         requete(
