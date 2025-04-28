@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.PromotionsController">
+    <children>
+        <TableView fx:id="promotionsTable" layoutX="128.0" layoutY="100.0" prefHeight="222.0" prefWidth="342.0">
+            <columns>
+                <TableColumn fx:id="idColumn" prefWidth="75.0" text="Id" />
+                <TableColumn fx:id="remiseColumn" prefWidth="150.4" text="Pourcentage Remise" />
+                <TableColumn fx:id="pointsColumn" prefWidth="114.4" text="Points Requis" />
+            </columns>
+        </TableView>
+        <Label layoutX="59.0" layoutY="14.0" text="Promotions Disponibles">
+            <font>
+                <Font size="48.0" />
+            </font>
+        </Label>
+    </children>
+</AnchorPane>
