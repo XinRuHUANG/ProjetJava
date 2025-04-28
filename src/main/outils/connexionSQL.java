@@ -6,7 +6,7 @@ import java.util.*;
 public class connexionSQL {
     public static final String url      = "jdbc:mysql://localhost:3306/projetjava";
     public static final String user     = "root";
-    public static final String password = "";
+    public static final String password = "cytech0001";
 
     public connexionSQL() { }
 

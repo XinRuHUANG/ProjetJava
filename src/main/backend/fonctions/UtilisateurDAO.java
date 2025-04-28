@@ -14,7 +14,7 @@ public class UtilisateurDAO {
         try (
                 Connection conn = DriverManager.getConnection(connexionSQL.url, connexionSQL.user, connexionSQL.password);
                 PreparedStatement stmt = conn.prepareStatement(
-                        "INSERT INTO utilisateur (nom, prenom, pointsFidelite) VALUES (?, ?, ?)",
+                        "INSERT INTO Utilisateur (nom, prenom, pointsFidelite) VALUES (?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS
                 )
         ) {
@@ -26,7 +26,7 @@ public class UtilisateurDAO {
 
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    u.setIdUtilisateur(generatedKeys.getInt(1));
+                    u.setIdentifiantUtilisateur(generatedKeys.getInt(1));
                 } else {
                     throw new IllegalStateException("Erreur lors de la récupération de l'ID utilisateur !");
                 }
@@ -39,9 +39,9 @@ public class UtilisateurDAO {
         for (var champ : champs) {
             switch (champ) {
                 case "pointsFidelite" -> requete(
-                        "UPDATE utilisateur SET pointsFidelite = "
+                        "UPDATE Utilisateur SET pointsFidelite = "
                                 + u.getPointsFidelite()
-                                + " WHERE identifiantUtilisateur = " + u.getIdUtilisateur() + ";"
+                                + " WHERE identifiantUtilisateur = " + u.getIdentifiantUtilisateur() + ";"
                 );
                 default -> throw new IllegalArgumentException("Champ inconnu : " + champ);
             }
@@ -50,15 +50,15 @@ public class UtilisateurDAO {
 
     public static void supprimerUtilisateurBDD(Utilisateur u) throws Exception {
         requete(
-                "DELETE FROM utilisateur WHERE identifiantUtilisateur = "
-                        + u.getIdUtilisateur()
+                "DELETE FROM Utilisateur WHERE identifiantUtilisateur = "
+                        + u.getIdentifiantUtilisateur()
                         + ";"
         );
     }
 
     public static Utilisateur lireUtilisateurBDD(int id) throws Exception {
         var rows = requeteAvecAffichage(
-                "SELECT nom, prenom, pointsFidelite FROM utilisateur WHERE identifiantUtilisateur = "
+                "SELECT nom, prenom, pointsFidelite FROM Utilisateur WHERE identifiantUtilisateur = "
                         + id + ";",
                 new ArrayList<>(Arrays.asList("nom", "prenom", "pointsFidelite"))
         );
@@ -78,7 +78,7 @@ public class UtilisateurDAO {
     public static Set<Utilisateur> lireUtilisateursParPromotion(int idPromo) throws Exception {
         // on récupère simplement les IDs depuis la table d’association 'utiliser'
         var rows = connexionSQL.requeteAvecAffichage(
-                "SELECT identifiantUtilisateur FROM utiliser WHERE identifiantPromotion = " + idPromo + ";",
+                "SELECT identifiantUtilisateur FROM Utiliser WHERE identifiantPromotion = " + idPromo + ";",
                 new ArrayList<>(Arrays.asList("identifiantUtilisateur"))
         );
 
@@ -97,7 +97,7 @@ public class UtilisateurDAO {
     public static Utilisateur lireUtilisateurParDepot(int idDepot) throws Exception {
         var rows = requeteAvecAffichage(
                 "SELECT u.identifiantUtilisateur, u.nom, u.prenom, u.pointsFidelite " +
-                        "FROM utilisateur u " +
+                        "FROM Utilisateur u " +
                         "JOIN depot d ON u.identifiantUtilisateur = d.identifiantUtilisateur " +
                         "WHERE d.identifiantDepot = " + idDepot + ";",
                 new ArrayList<String>(Arrays.asList(

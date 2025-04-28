@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Utilisateur {
-    private int idUtilisateur;
+    private int identifiantUtilisateur;
     private String nom;
     private String prenom;
     private float pointsFidelite;
@@ -15,7 +15,7 @@ public class Utilisateur {
     private Set<Promotion> utiliser;
 
     public Utilisateur(int id, String nom, String prenom, float pts) {
-        this.idUtilisateur = id;
+        this.identifiantUtilisateur = id;
         this.nom = nom;
         this.prenom = prenom;
         this.pointsFidelite = pts;
@@ -24,8 +24,8 @@ public class Utilisateur {
     // getters / setters…
 
 
-    public int getIdUtilisateur() {return idUtilisateur;}
-    public void setIdUtilisateur(int idUtilisateur) {this.idUtilisateur = idUtilisateur;}
+    public int getIdentifiantUtilisateur() {return identifiantUtilisateur;}
+    public void setIdentifiantUtilisateur(int identifiantUtilisateur) {this.identifiantUtilisateur = identifiantUtilisateur;}
 
     public String getNom() {return nom;}
     public void setNom(String nom) {this.nom = nom;}
@@ -68,7 +68,7 @@ public class Utilisateur {
 
     public String consulterHistorique() {
         StringBuilder sb = new StringBuilder(
-                "Historique de " + idUtilisateur + " :\n");
+                "Historique de " + identifiantUtilisateur + " :\n");
         posseder.stream()
                 .sorted(Comparator.comparing(Depot::getDate).reversed()
                         .thenComparing(Depot::getHeure).reversed())
@@ -91,7 +91,7 @@ public class Utilisateur {
         if (this == o) return true;
         if (!(o instanceof Utilisateur)) return false;
         Utilisateur that = (Utilisateur) o;
-        return idUtilisateur == that.idUtilisateur
+        return identifiantUtilisateur == that.identifiantUtilisateur
                 && Float.compare(that.pointsFidelite, pointsFidelite) == 0
                 && Objects.equals(nom, that.nom)
                 && Objects.equals(prenom, that.prenom)
@@ -102,7 +102,7 @@ public class Utilisateur {
     @Override
     public String toString() {
         return "Utilisateur{" +
-                "idUtilisateur=" + idUtilisateur +
+                "idUtilisateur=" + identifiantUtilisateur +
                 ", nom='" + nom + '\'' +
                 ", prenom='" + prenom + '\'' +
                 ", pointsFidelite=" + pointsFidelite +

@@ -5,8 +5,6 @@ import main.backend.fonctions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-
 import static main.outils.connexionSQL.requete;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +22,7 @@ class UtilisateurTest {
     @Test
     void testBasicAccessors() {
         Utilisateur u = new Utilisateur(5, "N", "P", 4f);
-        assertEquals(5, u.getIdUtilisateur());
+        assertEquals(5, u.getIdentifiantUtilisateur());
         assertEquals("N", u.getNom());
         u.setPrenom("X");
         assertEquals("X", u.getPrenom());
@@ -37,7 +35,7 @@ class UtilisateurTest {
 
         // CREATE
         UtilisateurDAO.ajouterUtilisateurBDD(u);
-        int id = u.getIdUtilisateur();
+        int id = u.getIdentifiantUtilisateur();
 
         // READ
         Utilisateur lu = UtilisateurDAO.lireUtilisateurBDD(id);
